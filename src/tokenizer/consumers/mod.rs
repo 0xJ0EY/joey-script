@@ -2,6 +2,7 @@ pub mod whitespace;
 pub mod number;
 pub mod identifier;
 pub mod string;
+pub mod comments;
 
 #[macro_export]
 macro_rules! tokenize_error {

@@ -194,4 +194,5 @@ mod tests {
 
         assert_eq!(token.error_type, TokenErrorType::UnterminatedStringLiteral);
     }
+    
 }

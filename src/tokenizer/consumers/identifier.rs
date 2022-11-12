@@ -81,4 +81,5 @@ mod tests {
         assert_eq!(token.token_type, TokenType::Identifier);
         assert_eq!(tokenizer.get_current_index(), input.len());
     }
+    
 }

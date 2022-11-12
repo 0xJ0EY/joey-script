@@ -1,1 +1,1 @@
-"Foo\abar"
+"Hello world"

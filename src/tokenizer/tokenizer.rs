@@ -1,3 +1,4 @@
+use super::consumers::comments::{is_line_comment, is_block_comment, consume_line_comment, consume_block_comment};
 use super::consumers::string::{is_string, consume_string};
 use super::{Token, TokenizeError};
 use super::consumers::identifier::{is_identifier, consume_identifier};
@@ -53,6 +54,10 @@ impl Tokenizer {
 
         return value;
     }
+
+    pub fn next(&mut self) {
+        self.index +=1;
+    }
 }
 
 macro_rules! consume_and_handle {
@@ -71,6 +76,16 @@ pub fn parse(file_content: &String) -> Result<Vec<Token>, TokenizeError> {
     while tokenizer.has_tokens() {
         if is_whitespace(&tokenizer) {
             consume_whitespace(&mut tokenizer);
+            continue;
+        }
+
+        if is_line_comment(&tokenizer) {
+            consume_line_comment(&mut tokenizer);
+            continue;
+        }
+
+        if is_block_comment(&tokenizer) {
+            consume_block_comment(&mut tokenizer);
             continue;
         }
 
