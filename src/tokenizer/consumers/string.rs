@@ -50,7 +50,6 @@ pub fn consume_string(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
     let mut index = tokenizer.get_current_index();
     let mut token = unwrap_token!(tokenizer);
     
-    
     while token.is_some() && !is_end_string(tokenizer, delimiter) {
         let val = token.unwrap().clone();
 
@@ -85,7 +84,6 @@ pub fn consume_string(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
         raw_value,
         range: (start, end)
     })
-
 }
 
 #[cfg(test)]
@@ -196,5 +194,4 @@ mod tests {
 
         assert_eq!(token.error_type, TokenErrorType::UnterminatedStringLiteral);
     }
-
 }

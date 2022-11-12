@@ -46,5 +46,4 @@ mod tests {
 
         assert_eq!(tokenizer.get_current_index(), input.len());
     }
-
 }

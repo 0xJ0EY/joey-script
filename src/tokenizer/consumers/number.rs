@@ -81,5 +81,4 @@ mod tests {
         assert_eq!(token.value, "123");
         assert_eq!(tokenizer.get_current_index(), input.len());
     }
-
 }
