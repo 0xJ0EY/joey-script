@@ -11,12 +11,10 @@ pub fn consume_identifier(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeEr
     let mut value = String::new();
     let start = tokenizer.get_current_index();
 
-
     let mut token = tokenizer.consume();
 
     while token.is_some() && util::is_identifier(&token.unwrap()) {
         value.push(token.unwrap().clone());
-
 
         token = tokenizer.consume();
     }
