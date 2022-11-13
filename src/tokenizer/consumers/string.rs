@@ -10,23 +10,22 @@ pub fn is_string(tokenizer: &Tokenizer) -> bool {
 }
 
 fn is_end_string(tokenizer: &Tokenizer, delimiter: char) -> bool {
-    if is_escaped(tokenizer, tokenizer.get_current_index() - 1) { return false; }
+    if is_escaped(tokenizer) { return false; }    
 
-    // because consume() ups the index by one, we need to peek back
-    let token = tokenizer.peek_back().unwrap();
+    let token = tokenizer.token().unwrap();
 
     token.clone() == delimiter
 }
 
-fn is_escaped(tokenizer: &Tokenizer, index: usize) -> bool {
-    tokenizer.token_at(index - 1)
+fn is_escaped(tokenizer: &Tokenizer) -> bool {
+    tokenizer.peek_back()
         .unwrap_or(&' ')
         .clone() == '\\'
 }
 
 macro_rules! unwrap_token {
     ($a:expr) => {
-        match $a.consume() {
+        match $a.token() {
             Some(val) => Some(val.to_owned()),
             None => None,
         }
@@ -35,19 +34,20 @@ macro_rules! unwrap_token {
 
 pub fn consume_string(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError> {
     // We clone the delimiter here, otherwise the tokenizer will have a mutable reference
-    let delimiter = tokenizer.consume().unwrap().clone();
+    let delimiter = tokenizer.token().unwrap().clone();
 
     if !util::is_string_delimiter(&delimiter) {
         return tokenize_error!(TokenErrorType::UnexpectedToken, tokenizer);
     }
     
+    let mut value = String::new();
     let mut raw_value = String::new();
     raw_value.push(delimiter);
 
-    let mut value = String::new();
+    tokenizer.next();
+
     let start = tokenizer.get_current_index();
 
-    let mut index = tokenizer.get_current_index();
     let mut token = unwrap_token!(tokenizer);
     
     while token.is_some() && !is_end_string(tokenizer, delimiter) {
@@ -59,11 +59,11 @@ pub fn consume_string(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
 
         raw_value.push(val);
 
-        if !is_escape_char(&val) || is_escaped(tokenizer, index) {
+        if !is_escape_char(&val) || is_escaped(tokenizer) {
             value.push(val);
         }
 
-        index = tokenizer.get_current_index();
+        tokenizer.next();
         token = unwrap_token!(tokenizer);
     }
 
@@ -71,7 +71,9 @@ pub fn consume_string(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
     if token.is_some() && (token.unwrap() == delimiter) {
         let val = token.unwrap().clone();
         raw_value.push(val);
-        
+
+        // Since we got a fine delimiter, we need to go to the next character in the input 
+        tokenizer.next();        
     } else {
         return tokenize_error!(TokenErrorType::UnterminatedStringLiteral, tokenizer);
     }
