@@ -103,4 +103,17 @@ mod tests {
         consume_not_an_operator: "~",
     }
 
+    #[test]
+    fn operator_only_consumes_one_at_the_time() {
+        let input = String::from_str("++").unwrap();
+        let mut tokenizer = Tokenizer::new(&input);
+
+        let operator = super::consume_operator(&mut tokenizer).unwrap();
+
+        assert_eq!(operator.value, "+");
+        assert_eq!(operator.raw_value, "+");
+        assert_eq!(operator.token_type, TokenType::Operator);
+        assert_eq!(tokenizer.get_current_index(), 1);
+    }
+
 }
