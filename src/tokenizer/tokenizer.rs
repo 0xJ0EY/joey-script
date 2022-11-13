@@ -1,7 +1,9 @@
+use crate::tokenizer::consumers::parenthesis::consume_parenthesis;
 use crate::tokenizer::consumers::seperator::consume_seperator;
 
 use super::consumers::comments::{is_line_comment, is_block_comment, consume_line_comment, consume_block_comment};
 use super::consumers::operator::{is_operator, consume_operator};
+use super::consumers::parenthesis::is_parenthesis;
 use super::consumers::seperator::is_separator;
 use super::consumers::string::{is_string, consume_string};
 use super::consumers::terminator::{is_terminator, consume_terminator};
@@ -101,6 +103,11 @@ pub fn parse(file_content: &String) -> Result<Vec<Token>, TokenizeError> {
 
         if is_separator(&tokenizer) {
             consume_and_handle!(consume_seperator(&mut tokenizer), tokens);
+            continue;
+        }
+
+        if is_parenthesis(&tokenizer) {
+            consume_and_handle!(consume_parenthesis(&mut tokenizer), tokens);
             continue;
         }
 
