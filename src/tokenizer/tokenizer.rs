@@ -1,7 +1,9 @@
+use crate::tokenizer::consumers::curly_brace::consume_curly_brace;
 use crate::tokenizer::consumers::parenthesis::consume_parenthesis;
 use crate::tokenizer::consumers::seperator::consume_seperator;
 
 use super::consumers::comments::{is_line_comment, is_block_comment, consume_line_comment, consume_block_comment};
+use super::consumers::curly_brace::is_curly_brace;
 use super::consumers::operator::{is_operator, consume_operator};
 use super::consumers::parenthesis::is_parenthesis;
 use super::consumers::seperator::is_separator;
@@ -32,10 +34,6 @@ impl Tokenizer {
 
     pub fn token(&self) -> Option<&char> {
         self.file_content.get(self.index)
-    }
-
-    pub fn token_at(&self, index: usize) -> Option<&char> {
-        self.file_content.get(index)
     }
 
     pub fn peek(&self) -> Option<&char> {
@@ -108,6 +106,11 @@ pub fn parse(file_content: &String) -> Result<Vec<Token>, TokenizeError> {
 
         if is_parenthesis(&tokenizer) {
             consume_and_handle!(consume_parenthesis(&mut tokenizer), tokens);
+            continue;
+        }
+
+        if is_curly_brace(&tokenizer) {
+            consume_and_handle!(consume_curly_brace(&mut tokenizer), tokens);
             continue;
         }
 

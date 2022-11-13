@@ -9,7 +9,7 @@ pub enum TokenType {
     Number,
     String,
     Parenthesis,
-    CurlyBraces,
+    CurlyBrace,
     Seperator,
     Terminator
 }

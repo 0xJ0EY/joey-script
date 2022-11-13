@@ -7,6 +7,7 @@ pub mod operator;
 pub mod terminator;
 pub mod seperator;
 pub mod parenthesis;
+pub mod curly_brace;
 
 #[macro_export]
 macro_rules! tokenize_error {
