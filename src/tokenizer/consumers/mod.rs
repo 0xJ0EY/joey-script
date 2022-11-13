@@ -3,6 +3,7 @@ pub mod number;
 pub mod identifier;
 pub mod string;
 pub mod comments;
+pub mod operator;
 
 #[macro_export]
 macro_rules! tokenize_error {
