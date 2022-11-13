@@ -1,6 +1,7 @@
 use super::consumers::comments::{is_line_comment, is_block_comment, consume_line_comment, consume_block_comment};
 use super::consumers::operator::{is_operator, consume_operator};
 use super::consumers::string::{is_string, consume_string};
+use super::consumers::terminator::{is_terminator, consume_terminator};
 use super::{Token, TokenizeError};
 use super::consumers::identifier::{is_identifier, consume_identifier};
 use super::consumers::number::{is_number, consume_number};
@@ -87,6 +88,11 @@ pub fn parse(file_content: &String) -> Result<Vec<Token>, TokenizeError> {
 
         if is_block_comment(&tokenizer) {
             consume_block_comment(&mut tokenizer);
+            continue;
+        }
+
+        if is_terminator(&tokenizer) {
+            consume_and_handle!(consume_terminator(&mut tokenizer), tokens);
             continue;
         }
 
