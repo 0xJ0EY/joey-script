@@ -66,13 +66,10 @@ fn consume_false(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError> {
 pub fn consume_boolean(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError> {
 
     if is_true(tokenizer) {
-
-        println!("true");
         return consume_true(tokenizer);
     }
 
     if is_false(tokenizer) {
-        println!("false");
         return consume_false(tokenizer);
     }
 
