@@ -8,9 +8,6 @@ pub enum TokenType {
     Literal(Literal),
     Seperator(Seperator),
     Operator,
-    Parenthesis,
-    CurlyBrace,
-    Terminator
 }
 
 #[derive(Debug, PartialEq)]
@@ -27,6 +24,7 @@ pub enum Seperator {
     Comma,
     Parenthesis,
     CurlyBrace,
+    Terminator,
 }
 
 #[derive(Debug)]

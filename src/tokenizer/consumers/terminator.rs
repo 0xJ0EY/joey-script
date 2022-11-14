@@ -1,5 +1,5 @@
 use crate::tokenizer::tokenizer::Tokenizer;
-use crate::tokenizer::{util as util, Token, TokenizeError, TokenType};
+use crate::tokenizer::{util as util, Token, TokenizeError, TokenType, Seperator};
 
 pub fn is_terminator(tokenizer: &Tokenizer) -> bool {
     let token = tokenizer.token().unwrap();
@@ -13,7 +13,7 @@ pub fn consume_terminator(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeEr
     let end = tokenizer.get_current_index();
 
     Ok(Token {
-        token_type: TokenType::Terminator,
+        token_type: TokenType::Seperator(Seperator::Terminator),
         value: token.clone(),
         raw_value: token,
         range: (start, end),
@@ -23,8 +23,8 @@ pub fn consume_terminator(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeEr
 #[cfg(test)]
 mod tests {
     use std::str::FromStr;
-
-    use crate::tokenizer::{tokenizer::Tokenizer, TokenType};
+ 
+    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, Seperator};
 
     #[test]
     fn is_terminator_input_a_terminator() {
@@ -54,7 +54,7 @@ mod tests {
         let token = super::consume_terminator(&mut tokenizer).unwrap();
 
         assert_eq!(tokenizer.get_current_index(), input.len());
-        assert_eq!(token.token_type, TokenType::Terminator);
+        assert_eq!(token.token_type, TokenType::Seperator(Seperator::Terminator));
         assert_eq!(token.value, ";");
         assert_eq!(token.raw_value, ";");
     }

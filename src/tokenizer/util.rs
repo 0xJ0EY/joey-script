@@ -30,10 +30,6 @@ pub fn is_number(token: &char) -> bool {
     REGEX_NUMBER.is_match(&(*token).to_string())
 }
 
-pub fn is_separator(token: &char) -> bool {
-    *token == '.' || *token == ','
-}
-
 pub fn is_period(token: &char) -> bool {
     *token == '.'
 }
