@@ -1,12 +1,12 @@
 use crate::tokenizer::consumers::curly_brace::consume_curly_brace;
 use crate::tokenizer::consumers::parenthesis::consume_parenthesis;
-use crate::tokenizer::consumers::seperator::consume_seperator;
+use crate::tokenizer::consumers::seperator::{consume_period, consume_comma};
 
 use super::consumers::comments::{is_line_comment, is_block_comment, consume_line_comment, consume_block_comment};
 use super::consumers::curly_brace::is_curly_brace;
 use super::consumers::operator::{is_operator, consume_operator};
 use super::consumers::parenthesis::is_parenthesis;
-use super::consumers::seperator::is_separator;
+use super::consumers::seperator::{is_period, is_comma};
 use super::consumers::string::{is_string, consume_string};
 use super::consumers::terminator::{is_terminator, consume_terminator};
 use super::{Token, TokenizeError};
@@ -99,8 +99,13 @@ pub fn parse(file_content: &String) -> Result<Vec<Token>, TokenizeError> {
             continue;
         }
 
-        if is_separator(&tokenizer) {
-            consume_and_handle!(consume_seperator(&mut tokenizer), tokens);
+        if is_period(&tokenizer) {
+            consume_and_handle!(consume_period(&mut tokenizer), tokens);
+            continue;
+        }
+
+        if is_comma(&tokenizer) {
+            consume_and_handle!(consume_comma(&mut tokenizer), tokens);
             continue;
         }
 

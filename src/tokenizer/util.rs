@@ -34,6 +34,14 @@ pub fn is_separator(token: &char) -> bool {
     *token == '.' || *token == ','
 }
 
+pub fn is_period(token: &char) -> bool {
+    *token == '.'
+}
+
+pub fn is_comma(token: &char) -> bool {
+    *token == ','
+}
+
 pub fn is_parenthesis(token: &char) -> bool {
     *token == '(' || *token == ')'
 }

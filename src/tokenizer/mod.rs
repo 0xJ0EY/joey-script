@@ -6,10 +6,10 @@ mod consumers;
 pub enum TokenType {
     Identifier,
     Literal(Literal),
+    Seperator(Seperator),
     Operator,
     Parenthesis,
     CurlyBrace,
-    Seperator,
     Terminator
 }
 
@@ -19,6 +19,14 @@ pub enum Literal {
     String,
     Boolean,
     Null
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Seperator {
+    Period,
+    Comma,
+    Parenthesis,
+    CurlyBrace,
 }
 
 #[derive(Debug)]
