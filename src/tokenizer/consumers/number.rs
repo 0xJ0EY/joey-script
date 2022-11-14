@@ -1,5 +1,5 @@
 use crate::tokenizer::tokenizer::Tokenizer;
-use crate::tokenizer::{util as util, Token, TokenType, TokenizeError};
+use crate::tokenizer::{util as util, Token, TokenType, Literal, TokenizeError};
 
 pub fn is_number(tokenizer: &Tokenizer) -> bool {
     let token = tokenizer.token().unwrap();
@@ -27,7 +27,7 @@ pub fn consume_number(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
     let raw_value = value.clone();
 
     Ok(Token {
-        token_type: TokenType::Number,
+        token_type: TokenType::Literal(Literal::Number),
         raw_value,
         value,
         range: (start, end),
@@ -38,7 +38,7 @@ pub fn consume_number(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
 mod tests {
     use std::str::FromStr;
 
-    use crate::tokenizer::tokenizer::Tokenizer;
+    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, Literal};
 
     #[test]
     fn is_number_a_number() {
@@ -68,6 +68,7 @@ mod tests {
         let token = super::consume_number(&mut tokenizer).unwrap();
 
         assert_eq!(token.value, "1");
+        assert_eq!(token.token_type, TokenType::Literal(Literal::Number));
         assert_eq!(tokenizer.get_current_index(), input.len());
     }
 
@@ -79,6 +80,7 @@ mod tests {
         let token = super::consume_number(&mut tokenizer).unwrap();
 
         assert_eq!(token.value, "123");
+        assert_eq!(token.token_type, TokenType::Literal(Literal::Number));
         assert_eq!(tokenizer.get_current_index(), input.len());
     }
 

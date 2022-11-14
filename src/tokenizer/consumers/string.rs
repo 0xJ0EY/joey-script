@@ -1,7 +1,7 @@
 use crate::tokenizer::util::{is_eol, is_escape_char};
 use crate::{tokenize_error};
 use crate::tokenizer::tokenizer::Tokenizer;
-use crate::tokenizer::{util as util, Token, TokenizeError, TokenErrorType, TokenType};
+use crate::tokenizer::{util as util, Token, TokenizeError, TokenErrorType, TokenType, Literal};
 
 pub fn is_string(tokenizer: &Tokenizer) -> bool {
     let token = tokenizer.token().unwrap();
@@ -67,7 +67,7 @@ pub fn consume_string(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
         token = unwrap_token!(tokenizer);
     }
 
-    // the last token should be the same as the first delimiter
+    // the last token should be the same asgit  the first delimiter
     if token.is_some() && (token.unwrap() == delimiter) {
         let val = token.unwrap().clone();
         raw_value.push(val);
@@ -81,7 +81,7 @@ pub fn consume_string(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
     let end = tokenizer.get_current_index();
 
     Ok(Token {
-        token_type: TokenType::String,
+        token_type: TokenType::Literal(Literal::String),
         value,
         raw_value,
         range: (start, end)
@@ -92,7 +92,7 @@ pub fn consume_string(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
 mod tests {
     use std::str::FromStr;
 
-    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, TokenErrorType};
+    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, Literal, TokenErrorType};
 
     #[test]
     fn is_string_a_string() {
@@ -123,7 +123,7 @@ mod tests {
 
         assert_eq!(token.value, "Foobar");
         assert_eq!(token.raw_value, "\"Foobar\"");
-        assert_eq!(token.token_type, TokenType::String);
+        assert_eq!(token.token_type, TokenType::Literal(Literal::String));
         assert_eq!(tokenizer.get_current_index(), input.len());
     }
 
@@ -136,7 +136,7 @@ mod tests {
 
         assert_eq!(token.value, "Foo\"bar");
         assert_eq!(token.raw_value, "\"Foo\\\"bar\"");
-        assert_eq!(token.token_type, TokenType::String);
+        assert_eq!(token.token_type, TokenType::Literal(Literal::String));
         assert_eq!(tokenizer.get_current_index(), input.len());
     }
 
@@ -149,7 +149,7 @@ mod tests {
 
         assert_eq!(token.value, "Fooabar");
         assert_eq!(token.raw_value, "\"Foo\\abar\"");
-        assert_eq!(token.token_type, TokenType::String);
+        assert_eq!(token.token_type, TokenType::Literal(Literal::String));
         assert_eq!(tokenizer.get_current_index(), input.len());
     }
 
@@ -162,7 +162,7 @@ mod tests {
 
         assert_eq!(token.value, "Foo\\bar");
         assert_eq!(token.raw_value, "\"Foo\\\\bar\"");
-        assert_eq!(token.token_type, TokenType::String);
+        assert_eq!(token.token_type, TokenType::Literal(Literal::String));
         assert_eq!(tokenizer.get_current_index(), input.len());
     }
 

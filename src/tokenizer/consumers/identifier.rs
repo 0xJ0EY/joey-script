@@ -1,5 +1,5 @@
 use crate::tokenizer::tokenizer::Tokenizer;
-use crate::tokenizer::{util as util, Token, TokenType, TokenizeError};
+use crate::tokenizer::{util as util, Token, TokenType, TokenizeError };
 
 pub fn is_identifier(tokenizer: &Tokenizer) -> bool {
     let token = tokenizer.token().unwrap();

@@ -5,13 +5,20 @@ mod consumers;
 #[derive(Debug, PartialEq)]
 pub enum TokenType {
     Identifier,
+    Literal(Literal),
     Operator,
-    Number,
-    String,
     Parenthesis,
     CurlyBrace,
     Seperator,
     Terminator
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Literal {
+    Number,
+    String,
+    Boolean,
+    Null
 }
 
 #[derive(Debug)]
