@@ -1,30 +1,13 @@
-use std::vec;
-
 use crate::{tokenizer::{tokenizer::Tokenizer, TokenizeError, Token, TokenErrorType, Literal, TokenType}, tokenize_error};
 
-fn is_word(tokenizer: &Tokenizer, word: &Vec<char>) -> bool {
-
-    for index in 0..word.len() {
-        let char = tokenizer.peek_forward(index);
-        
-        if char.is_none() { return false }
-
-        if char.unwrap().to_owned() != word[index] { return false }
-    }
-
-    true
-}
+use super::is_word;
 
 fn is_true(tokenizer: &Tokenizer) -> bool {
-    let word = vec!['t', 'r', 'u', 'e'];
-
-    is_word(tokenizer, &word)
+    is_word(tokenizer, "true")
 } 
 
 fn is_false(tokenizer: &Tokenizer) -> bool {
-    let word = vec!['f', 'a', 'l', 's', 'e'];
-
-    is_word(tokenizer, &word)
+    is_word(tokenizer, "false")
 } 
 
 pub fn is_boolean(tokenizer: &Tokenizer) -> bool {
