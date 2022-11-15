@@ -5,6 +5,7 @@ use crate::tokenizer::consumers::seperator::{consume_period, consume_comma};
 use super::consumers::boolean::{is_boolean, consume_boolean};
 use super::consumers::comments::{is_line_comment, is_block_comment, consume_line_comment, consume_block_comment};
 use super::consumers::curly_brace::is_curly_brace;
+use super::consumers::null::{is_null, consume_null};
 use super::consumers::operator::{is_operator, consume_operator};
 use super::consumers::parenthesis::is_parenthesis;
 use super::consumers::seperator::{is_period, is_comma};
@@ -107,6 +108,11 @@ pub fn parse(file_content: &String) -> Result<Vec<Token>, TokenizeError> {
 
         if is_boolean(&tokenizer) {
             consume_and_handle!(consume_boolean(&mut tokenizer), tokens);
+            continue;
+        }
+
+        if is_null(&tokenizer) {
+            consume_and_handle!(consume_null(&mut tokenizer), tokens);
             continue;
         }
 

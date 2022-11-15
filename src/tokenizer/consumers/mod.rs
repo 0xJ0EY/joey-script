@@ -11,6 +11,7 @@ pub mod seperator;
 pub mod parenthesis;
 pub mod curly_brace;
 pub mod boolean;
+pub mod null;
 
 #[macro_export]
 macro_rules! tokenize_error {
