@@ -4,6 +4,7 @@ mod consumers;
 
 #[derive(Debug, PartialEq)]
 pub enum TokenType {
+    Keyword,
     Identifier,
     Literal(Literal),
     Seperator(Seperator),

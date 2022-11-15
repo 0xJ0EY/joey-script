@@ -1,10 +1,12 @@
 use crate::tokenizer::consumers::curly_brace::consume_curly_brace;
+use crate::tokenizer::consumers::keywords::consume_keyword;
 use crate::tokenizer::consumers::parenthesis::consume_parenthesis;
 use crate::tokenizer::consumers::seperator::{consume_period, consume_comma};
 
 use super::consumers::boolean::{is_boolean, consume_boolean};
 use super::consumers::comments::{is_line_comment, is_block_comment, consume_line_comment, consume_block_comment};
 use super::consumers::curly_brace::is_curly_brace;
+use super::consumers::keywords::find_keyword;
 use super::consumers::null::{is_null, consume_null};
 use super::consumers::operator::{is_operator, consume_operator};
 use super::consumers::parenthesis::is_parenthesis;
@@ -103,6 +105,11 @@ pub fn parse(file_content: &String) -> Result<Vec<Token>, TokenizeError> {
 
         if is_block_comment(&tokenizer) {
             consume_block_comment(&mut tokenizer);
+            continue;
+        }
+
+        if let Ok(keyword) = find_keyword(&tokenizer) {
+            consume_and_handle!(consume_keyword(&mut tokenizer, keyword), tokens);
             continue;
         }
 
