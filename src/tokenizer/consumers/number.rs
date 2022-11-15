@@ -1,3 +1,4 @@
+use crate::tokenize_error;
 use crate::tokenizer::tokenizer::Tokenizer;
 use crate::tokenizer::{util as util, Token, TokenType, Literal, TokenizeError};
 
@@ -8,9 +9,12 @@ pub fn is_number(tokenizer: &Tokenizer) -> bool {
 }
 
 pub fn consume_number(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError> {
+    if !is_number(tokenizer) {
+        return tokenize_error!(crate::tokenizer::TokenErrorType::UnexpectedToken, tokenizer);
+    }
+
     let mut value = String::new();
     let start = tokenizer.get_current_index();
-
 
     let mut token = tokenizer.consume();
 
@@ -38,7 +42,7 @@ pub fn consume_number(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
 mod tests {
     use std::str::FromStr;
 
-    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, Literal};
+    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, Literal, TokenErrorType};
 
     #[test]
     fn is_number_a_number() {
@@ -82,6 +86,16 @@ mod tests {
         assert_eq!(token.value, "123");
         assert_eq!(token.token_type, TokenType::Literal(Literal::Number));
         assert_eq!(tokenizer.get_current_index(), input.len());
+    }
+
+    #[test]
+    fn consume_invalid_input() {
+        let input = String::from_str("🦀").unwrap();
+        let mut tokenizer = Tokenizer::new(&input);
+
+        let token = super::consume_number(&mut tokenizer).unwrap_err();
+
+        assert_eq!(token.error_type, TokenErrorType::UnexpectedToken);
     }
 
 }

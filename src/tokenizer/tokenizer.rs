@@ -85,7 +85,13 @@ pub fn parse(file_content: &String) -> Result<Vec<Token>, TokenizeError> {
 
     while tokenizer.has_tokens() {
         if is_whitespace(&tokenizer) {
-            consume_whitespace(&mut tokenizer);
+
+            let result = consume_whitespace(&mut tokenizer);
+
+            if result.is_err() {
+                return Err(result.unwrap_err())
+            }
+
             continue;
         }
 

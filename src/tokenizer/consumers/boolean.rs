@@ -80,7 +80,7 @@ pub fn consume_boolean(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError
 mod tests {
     use std::str::FromStr;
 
-    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, Literal};
+    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, Literal, TokenErrorType};
 
     #[test]
     fn true_is_true_is_true() {
@@ -166,6 +166,16 @@ mod tests {
         assert_eq!(result.value, "false");
         assert_eq!(result.raw_value, "false");
         assert_eq!(tokenizer.get_current_index(), 5);
+    }
+
+    #[test]
+    fn consume_invalid_input() {
+        let input = String::from_str("🦀").unwrap();
+        let mut tokenizer = Tokenizer::new(&input);
+
+        let token = super::consume_boolean(&mut tokenizer).unwrap_err();
+
+        assert_eq!(token.error_type, TokenErrorType::UnexpectedToken);
     }
 
 }

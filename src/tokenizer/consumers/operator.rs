@@ -1,3 +1,4 @@
+use crate::tokenize_error;
 use crate::tokenizer::tokenizer::Tokenizer;
 use crate::tokenizer::{util as util, Token, TokenizeError, TokenType};
 
@@ -10,12 +11,16 @@ pub fn is_operator(tokenizer: &Tokenizer) -> bool {
 }
 
 pub fn consume_operator(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError> {
+    if !is_operator(tokenizer) {
+        return tokenize_error!(crate::tokenizer::TokenErrorType::UnexpectedToken, tokenizer);
+    }
+
     let mut value = String::new();
     let start = tokenizer.get_current_index();
 
     let token = tokenizer.token();
 
-    if token.is_some() && is_operator(&tokenizer) {
+    if token.is_some() {
         value.push(token.unwrap().clone());
 
         tokenizer.next();
@@ -35,7 +40,7 @@ pub fn consume_operator(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeErro
 mod tests {
     use std::str::FromStr;
 
-    use crate::tokenizer::{tokenizer::Tokenizer, TokenType};
+    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, TokenErrorType};
     
     macro_rules! is_operator_tests {
         ($($name:ident: $value:expr,)*) => {
@@ -114,6 +119,16 @@ mod tests {
         assert_eq!(operator.raw_value, "+");
         assert_eq!(operator.token_type, TokenType::Operator);
         assert_eq!(tokenizer.get_current_index(), 1);
+    }
+
+    #[test]
+    fn consume_invalid_input() {
+        let input = String::from_str("🦀").unwrap();
+        let mut tokenizer = Tokenizer::new(&input);
+
+        let token = super::consume_operator(&mut tokenizer).unwrap_err();
+
+        assert_eq!(token.error_type, TokenErrorType::UnexpectedToken);
     }
 
 }
