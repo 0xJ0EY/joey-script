@@ -168,7 +168,7 @@ mod tests {
 
 
     #[test]
-    fn give_error_on_line_seperated_string() {
+    fn give_error_on_line_separated_string() {
         let input = String::from_str("\"Foo\nbar\"").unwrap();
         let mut tokenizer = Tokenizer::new(&input);
 

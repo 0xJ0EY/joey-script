@@ -1,6 +1,6 @@
 use crate::tokenize_error;
 use crate::tokenizer::tokenizer::Tokenizer;
-use crate::tokenizer::{util as util, Token, TokenizeError, TokenType, Seperator, TokenErrorType};
+use crate::tokenizer::{util as util, Token, TokenizeError, TokenType, Separator, TokenErrorType};
 
 pub fn is_parenthesis(tokenizer: &Tokenizer) -> bool {
     let token = tokenizer.token().unwrap();
@@ -18,7 +18,7 @@ pub fn consume_parenthesis(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeE
     let end = tokenizer.get_current_index();
 
     Ok(Token {
-        token_type: TokenType::Seperator(Seperator::Parenthesis),
+        token_type: TokenType::Separator(Separator::Parenthesis),
         value: token.clone(),
         raw_value: token,
         range: (start, end),
@@ -29,7 +29,7 @@ pub fn consume_parenthesis(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeE
 mod tests {
     use std::str::FromStr;
 
-    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, Seperator, TokenErrorType};
+    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, Separator, TokenErrorType};
 
     #[test]
     fn is_open_parenthesis_input_a_parenthesis() {
@@ -69,7 +69,7 @@ mod tests {
         let token = super::consume_parenthesis(&mut tokenizer).unwrap();
 
         assert_eq!(tokenizer.get_current_index(), input.len());
-        assert_eq!(token.token_type, TokenType::Seperator(Seperator::Parenthesis));
+        assert_eq!(token.token_type, TokenType::Separator(Separator::Parenthesis));
         assert_eq!(token.value, "(");
         assert_eq!(token.raw_value, "(");
     }
@@ -82,7 +82,7 @@ mod tests {
         let token = super::consume_parenthesis(&mut tokenizer).unwrap();
 
         assert_eq!(tokenizer.get_current_index(), input.len());
-        assert_eq!(token.token_type, TokenType::Seperator(Seperator::Parenthesis));
+        assert_eq!(token.token_type, TokenType::Separator(Separator::Parenthesis));
         assert_eq!(token.value, ")");
         assert_eq!(token.raw_value, ")");
     }

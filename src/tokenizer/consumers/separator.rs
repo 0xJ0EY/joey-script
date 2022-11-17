@@ -1,6 +1,6 @@
 use crate::tokenize_error;
 use crate::tokenizer::tokenizer::Tokenizer;
-use crate::tokenizer::{util as util, Token, TokenizeError, TokenType, Seperator};
+use crate::tokenizer::{util as util, Token, TokenizeError, TokenType, Separator};
 
 pub fn is_period(tokenizer: &Tokenizer) -> bool {
     let token = tokenizer.token().unwrap();
@@ -24,7 +24,7 @@ pub fn consume_period(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
     let end = tokenizer.get_current_index();
 
     Ok(Token {
-        token_type: TokenType::Seperator(Seperator::Period),
+        token_type: TokenType::Separator(Separator::Period),
         value: token.clone(),
         raw_value: token,
         range: (start, end),
@@ -41,7 +41,7 @@ pub fn consume_comma(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError> 
     let end = tokenizer.get_current_index();
 
     Ok(Token {
-        token_type: TokenType::Seperator(Seperator::Comma),
+        token_type: TokenType::Separator(Separator::Comma),
         value: token.clone(),
         raw_value: token,
         range: (start, end),
@@ -52,10 +52,10 @@ pub fn consume_comma(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError> 
 mod tests {
     use std::str::FromStr;
 
-    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, Seperator, TokenErrorType};
+    use crate::tokenizer::{tokenizer::Tokenizer, TokenType, Separator, TokenErrorType};
 
     #[test]
-    fn is_comma_input_a_seperator() {
+    fn is_comma_input_a_separator() {
         let input = String::from_str(",").unwrap();
         let tokenizer = Tokenizer::new(&input);
 
@@ -65,7 +65,7 @@ mod tests {
     }
 
     #[test]
-    fn is_period_input_a_seperator() {
+    fn is_period_input_a_separator() {
         let input = String::from_str(".").unwrap();
         let tokenizer = Tokenizer::new(&input);
 
@@ -75,7 +75,7 @@ mod tests {
     }
 
     #[test]
-    fn is_whitespace_input_not_a_seperator() {
+    fn is_whitespace_input_not_a_separator() {
         let input = String::from_str(" ").unwrap();
         let tokenizer = Tokenizer::new(&input);
 
@@ -92,7 +92,7 @@ mod tests {
         let token = super::consume_comma(&mut tokenizer).unwrap();
 
         assert_eq!(tokenizer.get_current_index(), input.len());
-        assert_eq!(token.token_type, TokenType::Seperator(Seperator::Comma));
+        assert_eq!(token.token_type, TokenType::Separator(Separator::Comma));
         assert_eq!(token.value, ",");
         assert_eq!(token.raw_value, ",");
     }
@@ -105,7 +105,7 @@ mod tests {
         let token = super::consume_period(&mut tokenizer).unwrap();
 
         assert_eq!(tokenizer.get_current_index(), input.len());
-        assert_eq!(token.token_type, TokenType::Seperator(Seperator::Period));
+        assert_eq!(token.token_type, TokenType::Separator(Separator::Period));
         assert_eq!(token.value, ".");
         assert_eq!(token.raw_value, ".");
     }

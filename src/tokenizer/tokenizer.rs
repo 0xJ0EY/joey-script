@@ -1,7 +1,7 @@
 use crate::tokenizer::consumers::curly_brace::consume_curly_brace;
 use crate::tokenizer::consumers::keywords::consume_keyword;
 use crate::tokenizer::consumers::parenthesis::consume_parenthesis;
-use crate::tokenizer::consumers::seperator::{consume_period, consume_comma};
+use crate::tokenizer::consumers::separator::{consume_period, consume_comma};
 
 use super::consumers::boolean::{is_boolean, consume_boolean};
 use super::consumers::comments::{is_line_comment, is_block_comment, consume_line_comment, consume_block_comment};
@@ -10,7 +10,7 @@ use super::consumers::keywords::find_keyword;
 use super::consumers::null::{is_null, consume_null};
 use super::consumers::operator::{is_operator, consume_operator};
 use super::consumers::parenthesis::is_parenthesis;
-use super::consumers::seperator::{is_period, is_comma};
+use super::consumers::separator::{is_period, is_comma};
 use super::consumers::string::{is_string, consume_string};
 use super::consumers::terminator::{is_terminator, consume_terminator};
 use super::{Token, TokenizeError};

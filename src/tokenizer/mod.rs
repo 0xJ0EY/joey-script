@@ -9,7 +9,7 @@ pub enum TokenType {
     Keyword,
     Identifier,
     Literal(Literal),
-    Seperator(Seperator),
+    Separator(Separator),
     Operator,
 }
 
@@ -22,7 +22,7 @@ pub enum Literal {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Seperator {
+pub enum Separator {
     Period,
     Comma,
     Parenthesis,

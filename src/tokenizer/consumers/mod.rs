@@ -7,7 +7,7 @@ pub mod string;
 pub mod comments;
 pub mod operator;
 pub mod terminator;
-pub mod seperator;
+pub mod separator;
 pub mod parenthesis;
 pub mod curly_brace;
 pub mod boolean;
