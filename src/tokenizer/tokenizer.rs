@@ -165,6 +165,7 @@ pub fn parse(file_content: &String) -> Result<Vec<Token>, TokenizeError> {
 
         if is_operator(&tokenizer) {
             consume_and_handle!(consume_operator(&mut tokenizer), tokens);
+            continue;
         }
 
         return Err(TokenizeError {
