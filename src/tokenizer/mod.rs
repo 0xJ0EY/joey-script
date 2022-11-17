@@ -1,6 +1,8 @@
 mod tokenizer;
 mod util;
 mod consumers;
+#[cfg(test)]
+mod tests;
 
 #[derive(Debug, PartialEq)]
 pub enum TokenType {
