@@ -1,6 +1,6 @@
 use crate::tokenizer::{Token, TokenType, Separator};
 
-use super::{AstParseError, Program, AstErrorType, parsers::{is_expression_statement, parse_expression_statement}};
+use super::{AstParseError, Program, AstErrorType, nodes::AstNode, parsers::expression_statements::{is_expression_statement, parse_expression_statement}};
 
 #[derive(Debug)]
 pub struct AstParser<'a> {
@@ -56,11 +56,14 @@ impl<'a> AstParser<'a> {
         self.index +=1;
     }
 
-    pub fn can_insert_automatic_semicolon(&self) -> bool {
+    pub fn can_insert_automatic_semicolon(&self, index: usize) -> bool {
         // https://262.ecma-international.org/13.0/#sec-rules-of-automatic-semicolon-insertion
         // TODO: missing "The previous token is ) and the inserted semicolon would then be parsed as the terminating semicolon of a do-while statement (14.7.2)."
-        let current_token   = self.peek_forward(0);
-        let offending_token = self.peek_forward(1);
+        let current_token   = self.tokens.get(index);
+        let offending_token = self.tokens.get(index + 1);
+
+        println!("{:?}", current_token);
+        println!("{:?}", offending_token);
 
         if current_token.is_none() || offending_token.is_none() { return false; }
 
@@ -75,6 +78,8 @@ impl<'a> AstParser<'a> {
             matches!(offending_token.token_type, TokenType::Separator(Separator::CurlyBrace)) && offending_token.raw_value == "}"
         };
 
+        println!("{:?}", offending_token_is_on_a_different_line());
+
         offending_token_is_on_a_different_line() || offending_token_is_closing_bracket()
     }
 
@@ -86,7 +91,8 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Program, AstParseError> {
 
     while parser.has_tokens() {
         if is_expression_statement(&parser) {
-            parse_expression_statement(&mut parser);
+            let expression_statement = parse_expression_statement(&mut parser)?;
+            program.body.push(AstNode::ExpressionStatement(expression_statement));
             continue;
         }
 
