@@ -29,20 +29,23 @@ pub fn parse_literal_expression_statement(parser: &mut AstParser) -> Result<Expr
                     return Err(AstParseError { index: parser.get_current_index(), error_type: AstErrorType::UnexpectedToken });
                 }
             } else {
+                let end = end_marker.range.1.clone();
                 parser.next();
+
+                return Ok(Some(end));
             }
         }
 
-        Ok(())
+        Ok(None)
     };
     
     let literal_token = handle_literal_token(parser)?;
     parser.next();
 
-    _ = handle_end_marker(parser)?;
+    let end_marker= handle_end_marker(parser)?;
 
-    let start   = parser.get_current_index();
-    let end     = parser.get_current_index();
+    let start   = literal_token.range.0;
+    let end     = end_marker.unwrap_or(literal_token.range.1);
 
     let expression = LiteralExpression { value: literal_token };
 
