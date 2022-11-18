@@ -13,7 +13,7 @@ use super::consumers::parenthesis::is_parenthesis;
 use super::consumers::separator::{is_period, is_comma};
 use super::consumers::string::{is_string, consume_string};
 use super::consumers::terminator::{is_terminator, consume_terminator};
-use super::{Token, TokenizeError};
+use super::{Token, TokenizeError, FileLocationPos};
 use super::consumers::identifier::{is_identifier, consume_identifier};
 use super::consumers::number::{is_number, consume_number};
 use super::consumers::whitespace::{is_whitespace, consume_whitespace};
@@ -58,6 +58,13 @@ impl Tokenizer {
 
     pub fn get_current_index(&self) -> usize {
         return self.index;
+    }
+
+    pub fn get_current_file_loc(&self) -> FileLocationPos {
+        FileLocationPos {
+            line: 0,
+            column: 0,
+        }
     }
 
     pub fn consume(&mut self) -> Option<&char> {

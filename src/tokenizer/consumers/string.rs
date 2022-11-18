@@ -1,7 +1,7 @@
 use crate::tokenizer::util::{is_eol, is_escape_char};
 use crate::{tokenize_error};
 use crate::tokenizer::tokenizer::Tokenizer;
-use crate::tokenizer::{util as util, Token, TokenizeError, TokenErrorType, TokenType, Literal};
+use crate::tokenizer::{util as util, Token, TokenizeError, TokenErrorType, TokenType, Literal, FileLocation};
 
 pub fn is_string(tokenizer: &Tokenizer) -> bool {
     let token = tokenizer.token().unwrap();
@@ -45,6 +45,7 @@ pub fn consume_string(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
     raw_value.push(delimiter);
 
     let start = tokenizer.get_current_index();
+    let start_pos = tokenizer.get_current_file_loc();
 
     tokenizer.next();
 
@@ -79,12 +80,14 @@ pub fn consume_string(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
     }
 
     let end = tokenizer.get_current_index();
+    let end_pos = tokenizer.get_current_file_loc();
 
     Ok(Token {
         token_type: TokenType::Literal(Literal::String),
         value,
         raw_value,
-        range: (start, end)
+        range: (start, end),
+        loc: FileLocation { start: start_pos, end: end_pos },
     })
 }
 

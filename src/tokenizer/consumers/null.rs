@@ -1,4 +1,4 @@
-use crate::{tokenize_error, tokenizer::{Token, tokenizer::Tokenizer, TokenizeError, TokenErrorType, Literal, TokenType}};
+use crate::{tokenize_error, tokenizer::{Token, tokenizer::Tokenizer, TokenizeError, TokenErrorType, Literal, TokenType, FileLocation}};
 
 use super::is_word;
 
@@ -10,6 +10,7 @@ pub fn consume_null(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError> {
     if !is_null(tokenizer) { return tokenize_error!(TokenErrorType::UnexpectedToken, tokenizer); }
 
     let start = tokenizer.get_current_index();
+    let start_pos = tokenizer.get_current_file_loc();
 
     let mut raw_value = String::new();
 
@@ -22,12 +23,14 @@ pub fn consume_null(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError> {
     }
 
     let end  = tokenizer.get_current_index();
+    let end_pos = tokenizer.get_current_file_loc();
 
     Ok(Token {
         token_type: TokenType::Literal(Literal::Null),
         value: String::new(),
         raw_value,
         range: (start, end),
+        loc: FileLocation { start: start_pos, end: end_pos }
     })
 }
 

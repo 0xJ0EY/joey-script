@@ -1,6 +1,6 @@
 use crate::tokenize_error;
 use crate::tokenizer::tokenizer::Tokenizer;
-use crate::tokenizer::{util as util, Token, TokenizeError, TokenType};
+use crate::tokenizer::{util as util, Token, TokenizeError, TokenType, FileLocation};
 
 // Note: An operator may only be 1 character long, of what kind the operator exists should be later handeld in the AST parsing
 
@@ -17,6 +17,7 @@ pub fn consume_operator(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeErro
 
     let mut value = String::new();
     let start = tokenizer.get_current_index();
+    let start_pos = tokenizer.get_current_file_loc();
 
     let token = tokenizer.token();
 
@@ -27,12 +28,14 @@ pub fn consume_operator(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeErro
     }
 
     let end = tokenizer.get_current_index();
+    let end_pos = tokenizer.get_current_file_loc();
 
     Ok(Token {
         token_type: TokenType::Operator,
         raw_value: value.clone(),
         value,
-        range: (start, end)
+        range: (start, end),
+        loc: FileLocation { start: start_pos, end: end_pos },
     })
 }
 
