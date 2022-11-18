@@ -1,4 +1,4 @@
-use super::Literal;
+use super::{Literal, Identifier};
 
 #[derive(Debug)]
 pub struct LiteralExpression {
@@ -18,7 +18,13 @@ pub struct CallExpression {
 }
 
 #[derive(Debug)]
+pub struct IdentifierExpression {
+    pub identifier: Identifier,
+}
+
+#[derive(Debug)]
 pub enum Expression {
+    Identifier(IdentifierExpression),
     Literal(LiteralExpression),
     BinaryExpression(BinaryExpression),
     CallExpression(CallExpression),

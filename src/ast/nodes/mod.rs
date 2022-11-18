@@ -4,11 +4,19 @@ use self::{expression_statement::ExpressionStatement, block_statement::BlockStat
 
 pub mod expression_statement;
 pub mod block_statement;
+pub mod variable_declaration;
 
 #[derive(Debug)]
 pub struct Literal {
     pub value: String,
     pub raw: String,
+    pub range: (usize, usize),
+    pub loc: FileLocation,
+}
+
+#[derive(Debug)]
+pub struct Identifier {
+    pub name: String,
     pub range: (usize, usize),
     pub loc: FileLocation,
 }
