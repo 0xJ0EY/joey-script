@@ -13,6 +13,7 @@ pub mod curly_brace;
 pub mod boolean;
 pub mod null;
 pub mod keywords;
+pub mod eol;
 
 #[macro_export]
 macro_rules! tokenize_error {

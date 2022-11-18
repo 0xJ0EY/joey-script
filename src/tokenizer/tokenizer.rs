@@ -6,6 +6,7 @@ use crate::tokenizer::consumers::separator::{consume_period, consume_comma};
 use super::consumers::boolean::{is_boolean, consume_boolean};
 use super::consumers::comments::{is_line_comment, is_block_comment, consume_line_comment, consume_block_comment};
 use super::consumers::curly_brace::is_curly_brace;
+use super::consumers::eol::{is_eol, consume_eol};
 use super::consumers::keywords::find_keyword;
 use super::consumers::null::{is_null, consume_null};
 use super::consumers::operator::{is_operator, consume_operator};
@@ -21,6 +22,8 @@ use super::consumers::whitespace::{is_whitespace, consume_whitespace};
 #[derive(Debug)]
 pub struct Tokenizer {
     index: usize,
+    eol_count: usize,
+    eol_index: usize,
     file_content: Vec<char>,
 }
 
@@ -28,6 +31,8 @@ impl Tokenizer {
     pub fn new(file_content: &String) -> Tokenizer {
         Tokenizer {
             index: 0,
+            eol_count: 0,
+            eol_index: 0,
             file_content: file_content.chars().collect()
         }
     }
@@ -59,12 +64,17 @@ impl Tokenizer {
     pub fn get_current_index(&self) -> usize {
         return self.index;
     }
+    
+    pub fn found_new_line(&mut self) {
+        self.eol_count += 1;
+        self.eol_index = self.index;
+    }
 
     pub fn get_current_file_loc(&self) -> FileLocationPos {
-        FileLocationPos {
-            line: 0,
-            column: 0,
-        }
+        let line = self.eol_count + 1;
+        let column = self.index - self.eol_index;
+
+        FileLocationPos { line, column }
     }
 
     pub fn consume(&mut self) -> Option<&char> {
@@ -94,14 +104,13 @@ pub fn parse(file_content: &String) -> Result<Vec<Token>, TokenizeError> {
     let mut tokenizer = Tokenizer::new(file_content);
 
     while tokenizer.has_tokens() {
+        if is_eol(&tokenizer) {
+            consume_eol(&mut tokenizer)?;
+            continue;
+        }
+
         if is_whitespace(&tokenizer) {
-
-            let result = consume_whitespace(&mut tokenizer);
-
-            if result.is_err() {
-                return Err(result.unwrap_err())
-            }
-
+            consume_whitespace(&mut tokenizer)?;
             continue;
         }
 
