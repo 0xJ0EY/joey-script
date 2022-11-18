@@ -9,6 +9,7 @@ mod parser;
 #[derive(Debug)]
 pub enum AstErrorType {
     UnexpectedToken,
+    UnexpectedEndOfInput,
 }
 
 #[derive(Debug)]

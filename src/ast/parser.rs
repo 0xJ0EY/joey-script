@@ -1,6 +1,6 @@
 use crate::tokenizer::{Token, TokenType, Separator};
 
-use super::{AstParseError, Program, AstErrorType, nodes::AstNode, parsers::{is_expression_statement, parse_expression_statement, is_block_statement, parse_block_statement}};
+use super::{AstParseError, Program, AstErrorType, nodes::AstNode, parsers::{expression_statements::{parse_expression_statement, is_expression_statement}, block_statements::{is_closed_block_statement, is_open_block_statement, parse_block_statement}}};
 
 #[derive(Debug)]
 pub struct AstParser<'a> {
@@ -78,8 +78,66 @@ impl<'a> AstParser<'a> {
         offending_token_is_on_a_different_line() || offending_token_is_closing_bracket()
     }
 
-    pub fn parse_body(&mut self) {
+    fn parse(&mut self) -> Result<AstNode, AstParseError> {
+        if is_expression_statement(self) {
+            let expression_statement = parse_expression_statement(self)?;
+            return Ok(AstNode::ExpressionStatement(expression_statement));
+        }
 
+        return Err(AstParseError {
+            index: self.get_current_index(),
+            error_type: AstErrorType::UnexpectedToken
+        })
+    }
+
+    pub fn parse_program(&mut self) -> Result<Vec<AstNode>, AstParseError> {
+        let mut body: Vec<AstNode> = Vec::new();
+
+        while self.has_tokens() {
+            if is_closed_block_statement(self) {
+                return Err(AstParseError {
+                    index: self.get_current_index(),
+                    error_type: AstErrorType::UnexpectedToken,
+                });
+            }
+
+            if is_open_block_statement(self) {
+                let block = parse_block_statement(self)?;
+                let block_statement = AstNode::BlockStatement(block);
+
+                body.push(block_statement);
+                continue;
+            }
+    
+            let node = self.parse()?;
+            body.push(node);
+        }
+
+        Ok(body)
+    }
+
+    pub fn parse_block(&mut self) -> Result<Vec<AstNode>, AstParseError> {
+        let mut body = Vec::new();
+
+        while self.has_tokens() {
+            if is_closed_block_statement(self) {
+                self.next();
+                return Ok(body);
+            }
+
+            if is_open_block_statement(self) {
+                parse_block_statement(self)?;
+                continue;
+            }
+    
+            let node = self.parse()?;
+            body.push(node);
+        }
+
+        return Err(AstParseError {
+            index: self.get_current_index(),
+            error_type: AstErrorType::UnexpectedEndOfInput
+        })
     }
 
 }
@@ -88,23 +146,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Program, AstParseError> {
     let mut parser = AstParser::new(tokens);
     let mut program = Program::default();
 
-    while parser.has_tokens() {
-        if is_block_statement(&parser) {
-            parse_block_statement(&mut parser)?;
-            continue;
-        }
-
-        if is_expression_statement(&parser) {
-            let expression_statement = parse_expression_statement(&mut parser)?;
-            program.body.push(AstNode::ExpressionStatement(expression_statement));
-            continue;
-        }
-
-        return Err(AstParseError {
-            index: parser.get_current_index(),
-            error_type: AstErrorType::UnexpectedToken
-        });
-    }
+    program.body = parser.parse_program()?;
 
     Ok(program)
 }

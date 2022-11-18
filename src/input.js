@@ -1,2 +1,4 @@
-"Hello world";
-"Goodbye world"
+{
+    "Foobar"
+    "Barfoo"
+}
