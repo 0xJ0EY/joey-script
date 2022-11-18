@@ -44,9 +44,9 @@ pub fn consume_string(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
     let mut raw_value = String::new();
     raw_value.push(delimiter);
 
-    tokenizer.next();
-
     let start = tokenizer.get_current_index();
+
+    tokenizer.next();
 
     let mut token = unwrap_token!(tokenizer);
     

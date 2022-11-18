@@ -22,11 +22,10 @@ pub fn consume_null(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError> {
     }
 
     let end  = tokenizer.get_current_index();
-    let value = raw_value.clone();
 
     Ok(Token {
         token_type: TokenType::Literal(Literal::Null),
-        value,
+        value: String::new(),
         raw_value,
         range: (start, end),
     })
@@ -67,7 +66,7 @@ mod tests {
 
         assert_eq!(tokenizer.get_current_index(), input.len());
         assert_eq!(token.token_type, TokenType::Literal(Literal::Null));
-        assert_eq!(token.value, "null");
+        assert_eq!(token.value, "");
         assert_eq!(token.raw_value, "null");
         assert_eq!(tokenizer.get_current_index(), 4)
     }
