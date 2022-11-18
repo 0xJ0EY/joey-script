@@ -62,9 +62,6 @@ impl<'a> AstParser<'a> {
         let current_token   = self.tokens.get(index);
         let offending_token = self.tokens.get(index + 1);
 
-        println!("{:?}", current_token);
-        println!("{:?}", offending_token);
-
         if current_token.is_none() || offending_token.is_none() { return false; }
 
         let current_token   = current_token.unwrap();
@@ -77,8 +74,6 @@ impl<'a> AstParser<'a> {
         let offending_token_is_closing_bracket = || {
             matches!(offending_token.token_type, TokenType::Separator(Separator::CurlyBrace)) && offending_token.raw_value == "}"
         };
-
-        println!("{:?}", offending_token_is_on_a_different_line());
 
         offending_token_is_on_a_different_line() || offending_token_is_closing_bracket()
     }
