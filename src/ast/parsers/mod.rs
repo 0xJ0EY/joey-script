@@ -18,12 +18,19 @@ pub fn parse_literal_expression_statement(parser: &mut AstParser) -> Result<Expr
     };
 
     let handle_end_marker = |parser: &mut AstParser| {
-        let end_marker = parser.consume();
+        let end_marker = parser.token();
 
         if end_marker.is_some() {
             let end_marker = end_marker.unwrap();
+
             if !matches!(end_marker.token_type, TokenType::Separator(Separator::Terminator)) {
-                return Err(AstParseError { index: parser.get_current_index(), error_type: super::AstErrorType::UnexpectedToken });
+                // Check if we can insert an automatic semicolon
+                
+                if !parser.can_insert_automatic_semicolon() {
+                    return Err(AstParseError { index: parser.get_current_index(), error_type: super::AstErrorType::UnexpectedToken });
+                }
+            } else {
+                parser.next();
             }
         }
 
@@ -31,7 +38,7 @@ pub fn parse_literal_expression_statement(parser: &mut AstParser) -> Result<Expr
     };
     
     let literal_token = handle_literal_token(parser)?;
-    let terminator_token = handle_end_marker(parser)?;
+    let _ = handle_end_marker(parser)?;
 
     let start = literal_token.range.0;
     let end = literal_token.range.1;
@@ -59,7 +66,7 @@ pub fn parse_expression_statement(parser: &mut AstParser) -> Result<ExpressionSt
 
 #[cfg(test)]
 mod tests {
-    use crate::{tokenizer, ast::{parser::AstParser, parsers::{is_literal_expression_statement, parse_literal_expression_statement}}};
+    use crate::{tokenizer, ast::{parser::AstParser, parsers::{is_literal_expression_statement, parse_literal_expression_statement}, nodes::expression_statement::Expression}};
 
     #[test]
     fn string_is_literal_expression_statement() {
@@ -129,15 +136,17 @@ mod tests {
         let mut parser = AstParser::new(&tokens);
 
         let result = parse_literal_expression_statement(&mut parser).unwrap();
-        /*
-        let literal = result.expression.value;
 
-        assert_eq!(literal.range.0, 0);
-        assert_eq!(literal.range.1, 8);
-        assert_eq!(literal.value, "Foobar");
-
-        assert_eq!(parser.get_current_index(), 2);
-        */
+        if let Expression::Literal(expression) = result.expression {
+            let literal = expression.value;
+            assert_eq!(literal.range.0, 0);
+            assert_eq!(literal.range.1, 8);
+            assert_eq!(literal.value, "Foobar");
+    
+            assert_eq!(parser.get_current_index(), 1);
+        } else {
+            panic!("Invalid return value");
+        }
     }
 
     #[test]
@@ -149,15 +158,17 @@ mod tests {
 
         _ = parse_literal_expression_statement(&mut parser).unwrap();
         let result = parse_literal_expression_statement(&mut parser).unwrap();
-        /*
-        let literal = result.value;
 
-        assert_eq!(literal.range.0, 9);
-        assert_eq!(literal.range.1, 14);
-        assert_eq!(literal.value, "Bar");
-
-        assert_eq!(parser.get_current_index(), 4);
-        */ 
+        if let Expression::Literal(expression) = result.expression {
+            let literal = expression.value;
+            assert_eq!(literal.range.0, 9);
+            assert_eq!(literal.range.1, 14);
+            assert_eq!(literal.value, "Bar");
+    
+            assert_eq!(parser.get_current_index(), 4);
+        } else {
+            panic!("Invalid return value");
+        }
     }
 
     #[test]
@@ -170,15 +181,17 @@ mod tests {
         _ = parse_literal_expression_statement(&mut parser).unwrap();
         _ = parse_literal_expression_statement(&mut parser).unwrap();
         let result = parse_literal_expression_statement(&mut parser).unwrap();
-        /*
-        let literal = result.value;
 
-        assert_eq!(literal.range.0, 15);
-        assert_eq!(literal.range.1, 20);
-        assert_eq!(literal.value, "Foo");
-
-        assert_eq!(parser.get_current_index(), 6);
-        */
+        if let Expression::Literal(expression) = result.expression {
+            let literal = expression.value;
+            assert_eq!(literal.range.0, 15);
+            assert_eq!(literal.range.1, 20);
+            assert_eq!(literal.value, "Foo");
+    
+            assert_eq!(parser.get_current_index(), 6);
+        } else {
+            panic!("Invalid return value");
+        }
     }
 
 }

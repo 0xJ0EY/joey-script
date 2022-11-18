@@ -39,13 +39,13 @@ pub struct Token {
     pub loc: FileLocation,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FileLocationPos {
     pub line: usize,
     pub column: usize,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FileLocation {
     pub start: FileLocationPos, 
     pub end: FileLocationPos

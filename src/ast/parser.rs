@@ -1,4 +1,4 @@
-use crate::tokenizer::Token;
+use crate::tokenizer::{Token, TokenType, Separator};
 
 use super::{AstParseError, Program, AstErrorType, parsers::{is_expression_statement, parse_expression_statement}};
 
@@ -54,6 +54,28 @@ impl<'a> AstParser<'a> {
 
     pub fn next(&mut self) {
         self.index +=1;
+    }
+
+    pub fn can_insert_automatic_semicolon(&self) -> bool {
+        // https://262.ecma-international.org/13.0/#sec-rules-of-automatic-semicolon-insertion
+        // TODO: missing "The previous token is ) and the inserted semicolon would then be parsed as the terminating semicolon of a do-while statement (14.7.2)."
+        let current_token   = self.peek_forward(0);
+        let offending_token = self.peek_forward(1);
+
+        if current_token.is_none() || offending_token.is_none() { return false; }
+
+        let current_token   = current_token.unwrap();
+        let offending_token = offending_token.unwrap();
+
+        let offending_token_is_on_a_different_line = || {
+            current_token.loc.end.line != offending_token.loc.start.line
+        };
+
+        let offending_token_is_closing_bracket = || {
+            matches!(offending_token.token_type, TokenType::Separator(Separator::CurlyBrace)) && offending_token.raw_value == "}"
+        };
+
+        offending_token_is_on_a_different_line() || offending_token_is_closing_bracket()
     }
 
 }
