@@ -12,7 +12,7 @@ pub enum AstErrorType {
 }
 
 #[derive(Debug)]
-pub struct AstError {
+pub struct AstParseError {
     pub index: usize,
     pub error_type: AstErrorType, 
 }
@@ -28,6 +28,6 @@ impl Default for Program {
     }
 }
 
-pub fn parse(tokens: &Vec<Token>) -> Result<Program, AstError> {
+pub fn parse(tokens: &Vec<Token>) -> Result<Program, AstParseError> {
     parser::parse(tokens)
 }

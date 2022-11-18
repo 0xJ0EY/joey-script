@@ -1,6 +1,6 @@
 use crate::tokenizer::Token;
 
-use super::{AstError, Program, AstErrorType};
+use super::{AstParseError, Program, AstErrorType, parsers::{is_expression_statement, parse_expression_statement}};
 
 #[derive(Debug)]
 pub struct AstParser<'a> {
@@ -58,12 +58,17 @@ impl<'a> AstParser<'a> {
 
 }
 
-pub fn parse(tokens: &Vec<Token>) -> Result<Program, AstError> {
+pub fn parse(tokens: &Vec<Token>) -> Result<Program, AstParseError> {
     let mut parser = AstParser::new(tokens);
     let mut program = Program::default();
 
     while parser.has_tokens() {
-        return Err(AstError {
+        if is_expression_statement(&parser) {
+            parse_expression_statement(&mut parser);
+            continue;
+        }
+
+        return Err(AstParseError {
             index: parser.get_current_index(),
             error_type: AstErrorType::UnexpectedToken
         });

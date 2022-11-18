@@ -1,10 +1,15 @@
 use super::Literal;
 
 #[derive(Debug)]
+pub struct LiteralExpression {
+    pub value: Literal,
+}
+
+#[derive(Debug)]
 pub struct BinaryExpression {
-    operator: String,
-    left: Literal,
-    right: Literal,
+    pub operator: String,
+    pub left: Literal,
+    pub right: Literal,
 }
 
 #[derive(Debug)]
@@ -14,7 +19,7 @@ pub struct CallExpression {
 
 #[derive(Debug)]
 pub enum Expression {
-    Literal(Literal),
+    Literal(LiteralExpression),
     BinaryExpression(BinaryExpression),
     CallExpression(CallExpression),
 }
