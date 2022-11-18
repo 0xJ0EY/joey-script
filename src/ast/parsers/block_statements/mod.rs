@@ -30,7 +30,7 @@ pub fn parse_block_statement(parser: &mut AstParser) -> Result<BlockStatement, A
 
     // Fetch all expressions within the block
     let body = parser.parse_block()?;
-    
+
     let end = parser.peek_back().unwrap().range.1;
 
     Ok(BlockStatement {

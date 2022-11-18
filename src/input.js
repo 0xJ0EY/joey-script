@@ -1,4 +1,2 @@
-{
-    "Foobar"
-    "Barfoo"
-}
+"Hello world";
+"Goodbye world"

@@ -126,7 +126,10 @@ impl<'a> AstParser<'a> {
             }
 
             if is_open_block_statement(self) {
-                parse_block_statement(self)?;
+                let block = parse_block_statement(self)?;
+                let block_statement = AstNode::BlockStatement(block);
+
+                body.push(block_statement);
                 continue;
             }
     
