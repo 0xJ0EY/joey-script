@@ -6,7 +6,7 @@ pub mod nodes;
 mod parsers;
 mod parser;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum AstErrorType {
     UnexpectedToken,
     UnexpectedEndOfInput,

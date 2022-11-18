@@ -142,6 +142,7 @@ mod tests {
             panic!("Invalid return value");
         }
     }
+
     #[test]
     fn new_line_separated_strings_are_parsable_literal_expression() {
         let content = String::from("'Foobar'\n'Bar'");

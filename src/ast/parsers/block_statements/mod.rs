@@ -38,3 +38,95 @@ pub fn parse_block_statement(parser: &mut AstParser) -> Result<BlockStatement, A
         range: (start, end)
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{tokenizer, ast::{parser::AstParser, parsers::block_statements::{is_open_block_statement, is_closed_block_statement}, AstErrorType}};
+
+    use super::parse_block_statement;
+
+    #[test]
+    fn open_bracket_is_open_block_statement() {
+        let content = String::from("{");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let parser = AstParser::new(&tokens);
+
+        let result = is_open_block_statement(&parser);
+
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    fn closed_bracket_is_not_open_block_statement() {
+        let content = String::from("}");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let parser = AstParser::new(&tokens);
+
+        let result = is_open_block_statement(&parser);
+
+        assert_eq!(result, false);
+    }
+
+    #[test]
+    fn closed_bracket_is_closed_block_statement() {
+        let content = String::from("}");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let parser = AstParser::new(&tokens);
+
+        let result = is_closed_block_statement(&parser);
+
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    fn open_bracket_is_not_closed_block_statement() {
+        let content = String::from("{");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let parser = AstParser::new(&tokens);
+
+        let result = is_closed_block_statement(&parser);
+
+        assert_eq!(result, false);
+    }
+
+    #[test]
+    fn block_with_literal_is_block_statement() {
+        let content = String::from("{ 123 }");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let mut parser = AstParser::new(&tokens);
+
+        let block = parse_block_statement(&mut parser).unwrap();
+
+        assert_eq!(block.body.len(), 1);
+    }
+
+    #[test]
+    fn block_with_subblock_with_literal_is_block_statement() {
+        let content = String::from("{ { 123 } }");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let mut parser = AstParser::new(&tokens);
+
+        let block = parse_block_statement(&mut parser).unwrap();
+
+        assert_eq!(block.body.len(), 1);
+    }
+
+    #[test]
+    fn block_without_closing_tag_throws_an_error() {
+        let content = String::from("{ { 123 }");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let mut parser = AstParser::new(&tokens);
+
+        let err = parse_block_statement(&mut parser).unwrap_err();
+
+        assert_eq!(err.error_type, AstErrorType::UnexpectedEndOfInput);
+    }
+
+}
