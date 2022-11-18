@@ -1,6 +1,6 @@
 use crate::tokenizer::{Token, TokenType, Separator};
 
-use super::{AstParseError, Program, AstErrorType, nodes::AstNode, parsers::expression_statements::{is_expression_statement, parse_expression_statement}};
+use super::{AstParseError, Program, AstErrorType, nodes::AstNode, parsers::{is_expression_statement, parse_expression_statement, is_block_statement, parse_block_statement}};
 
 #[derive(Debug)]
 pub struct AstParser<'a> {
@@ -78,6 +78,10 @@ impl<'a> AstParser<'a> {
         offending_token_is_on_a_different_line() || offending_token_is_closing_bracket()
     }
 
+    pub fn parse_body(&mut self) {
+
+    }
+
 }
 
 pub fn parse(tokens: &Vec<Token>) -> Result<Program, AstParseError> {
@@ -85,6 +89,11 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Program, AstParseError> {
     let mut program = Program::default();
 
     while parser.has_tokens() {
+        if is_block_statement(&parser) {
+            parse_block_statement(&mut parser)?;
+            continue;
+        }
+
         if is_expression_statement(&parser) {
             let expression_statement = parse_expression_statement(&mut parser)?;
             program.body.push(AstNode::ExpressionStatement(expression_statement));

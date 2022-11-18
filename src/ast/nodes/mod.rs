@@ -1,9 +1,9 @@
 use crate::tokenizer::{Token, FileLocation};
 
-use self::expression_statement::ExpressionStatement;
+use self::{expression_statement::ExpressionStatement, block_statement::BlockStatement};
 
 pub mod expression_statement;
-
+pub mod block_statement;
 
 #[derive(Debug)]
 pub struct Literal {
@@ -26,6 +26,6 @@ impl From<&Token> for Literal {
 
 #[derive(Debug)]
 pub enum AstNode {
-    ExpressionStatement(ExpressionStatement)
+    ExpressionStatement(ExpressionStatement),
+    BlockStatement(BlockStatement),
 }
-
