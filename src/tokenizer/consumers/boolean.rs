@@ -1,4 +1,4 @@
-use crate::{tokenizer::{tokenizer::Tokenizer, TokenizeError, Token, TokenErrorType, Literal, TokenType}, tokenize_error};
+use crate::{tokenizer::{tokenizer::Tokenizer, TokenizeError, Token, TokenErrorType, Literal, TokenType, FileLocation}, tokenize_error};
 
 use super::is_word;
 
@@ -16,6 +16,7 @@ pub fn is_boolean(tokenizer: &Tokenizer) -> bool {
 
 fn consume_value(tokenizer: &mut Tokenizer, length: usize) -> Result<Token, TokenizeError> {
     let start = tokenizer.get_current_index();
+    let start_pos = tokenizer.get_current_file_loc();
 
     let mut raw_value = String::new();
 
@@ -28,6 +29,7 @@ fn consume_value(tokenizer: &mut Tokenizer, length: usize) -> Result<Token, Toke
     }
 
     let end  = tokenizer.get_current_index();
+    let end_pos = tokenizer.get_current_file_loc();
     let value = raw_value.clone();
 
     Ok(Token {
@@ -35,6 +37,7 @@ fn consume_value(tokenizer: &mut Tokenizer, length: usize) -> Result<Token, Toke
         value,
         raw_value,
         range: (start, end),
+        loc: FileLocation { start: start_pos, end: end_pos }
     })
 }
 

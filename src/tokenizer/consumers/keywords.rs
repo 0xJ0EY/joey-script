@@ -1,6 +1,6 @@
 use once_cell::sync::Lazy;
 
-use crate::{tokenizer::{tokenizer::Tokenizer, TokenErrorType, Token, TokenizeError, TokenType}, tokenize_error};
+use crate::{tokenizer::{tokenizer::Tokenizer, TokenErrorType, Token, TokenizeError, TokenType, FileLocation}, tokenize_error};
 
 use super::is_word;
 
@@ -30,6 +30,7 @@ pub fn find_keyword(tokenizer: &Tokenizer) -> Result<&'static str, ()> {
 pub fn consume_keyword(tokenizer: &mut Tokenizer, keyword: &str) -> Result<Token, TokenizeError> {
     if !is_keyword(tokenizer, keyword) { return tokenize_error!(TokenErrorType::UnexpectedToken, tokenizer); }
     let start = tokenizer.get_current_index();
+    let start_pos = tokenizer.get_current_file_loc();
     let mut raw_value = String::new();
 
     for _ in 0..keyword.len() {
@@ -41,6 +42,7 @@ pub fn consume_keyword(tokenizer: &mut Tokenizer, keyword: &str) -> Result<Token
     }
 
     let end  = tokenizer.get_current_index();
+    let end_pos = tokenizer.get_current_file_loc();
     let value = raw_value.clone();
 
     Ok(Token {
@@ -48,6 +50,7 @@ pub fn consume_keyword(tokenizer: &mut Tokenizer, keyword: &str) -> Result<Token
         value,
         raw_value,
         range: (start, end),
+        loc: FileLocation { start: start_pos, end: end_pos }
     })
 }
 

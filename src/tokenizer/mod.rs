@@ -36,6 +36,19 @@ pub struct Token {
     pub value: String,
     pub raw_value: String,
     pub range: (usize, usize),
+    pub loc: FileLocation,
+}
+
+#[derive(Debug, Clone)]
+pub struct FileLocationPos {
+    pub line: usize,
+    pub column: usize,
+}
+
+#[derive(Debug, Clone)]
+pub struct FileLocation {
+    pub start: FileLocationPos, 
+    pub end: FileLocationPos
 }
 
 #[derive(Debug, PartialEq)]

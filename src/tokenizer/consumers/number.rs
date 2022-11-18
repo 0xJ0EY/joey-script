@@ -1,6 +1,6 @@
 use crate::tokenize_error;
 use crate::tokenizer::tokenizer::Tokenizer;
-use crate::tokenizer::{util as util, Token, TokenType, Literal, TokenizeError};
+use crate::tokenizer::{util as util, Token, TokenType, Literal, TokenizeError, FileLocation};
 
 pub fn is_number(tokenizer: &Tokenizer) -> bool {
     let token = tokenizer.token().unwrap();
@@ -15,6 +15,7 @@ pub fn consume_number(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
 
     let mut value = String::new();
     let start = tokenizer.get_current_index();
+    let start_pos = tokenizer.get_current_file_loc();
 
     let mut token = tokenizer.consume();
 
@@ -28,6 +29,7 @@ pub fn consume_number(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
     tokenizer.walk_back();
 
     let end = tokenizer.get_current_index();
+    let end_pos = tokenizer.get_current_file_loc();
     let raw_value = value.clone();
 
     Ok(Token {
@@ -35,6 +37,7 @@ pub fn consume_number(tokenizer: &mut Tokenizer) -> Result<Token, TokenizeError>
         raw_value,
         value,
         range: (start, end),
+        loc: FileLocation { start: start_pos, end: end_pos }
     })
 }
 
