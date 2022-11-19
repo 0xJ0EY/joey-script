@@ -18,6 +18,11 @@ pub struct CallExpression {
 }
 
 #[derive(Debug)]
+pub struct ObjectExpression {
+    
+}
+
+#[derive(Debug)]
 pub struct IdentifierExpression {
     pub identifier: Identifier,
 }
@@ -28,6 +33,7 @@ pub enum Expression {
     Literal(LiteralExpression),
     BinaryExpression(BinaryExpression),
     CallExpression(CallExpression),
+    ObjectExpression(ObjectExpression),
 }
 
 #[derive(Debug)]
