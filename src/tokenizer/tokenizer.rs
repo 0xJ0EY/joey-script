@@ -9,7 +9,7 @@ use super::consumers::curly_brace::is_curly_brace;
 use super::consumers::eol::{is_eol, consume_eol};
 use super::consumers::keywords::find_keyword;
 use super::consumers::null::{is_null, consume_null};
-use super::consumers::operator::{is_operator, consume_operator};
+use super::consumers::operator::{consume_operator, find_operator};
 use super::consumers::parenthesis::is_parenthesis;
 use super::consumers::separator::{is_period, is_comma};
 use super::consumers::string::{is_string, consume_string};
@@ -179,8 +179,8 @@ pub fn parse(file_content: &String) -> Result<Vec<Token>, TokenizeError> {
             continue;
         }
 
-        if is_operator(&tokenizer) {
-            consume_and_handle!(consume_operator(&mut tokenizer), tokens);
+        if let Ok(operator) = find_operator(&tokenizer) {
+            consume_and_handle!(consume_operator(&mut tokenizer, operator), tokens);
             continue;
         }
 

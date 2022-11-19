@@ -54,25 +54,6 @@ pub fn is_eol(token: &char) -> bool {
     REGEX_EOL.is_match(&(*token).to_string())
 }
 
-pub fn is_operator(token: &char) -> bool {
-    match *token {
-        '=' |
-        '>' |
-        '<' | 
-        '!' |
-        '+' |
-        '-' |
-        '/' |
-        '*' |
-        '%' |
-        '&' |
-        '|' |
-        '^' |
-        '~' => true,
-        _ => false
-    }
-}
-
 pub fn is_escape_char(token: &char) -> bool {
     *token == '\\'
 }
