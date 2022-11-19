@@ -80,7 +80,8 @@ pub fn parse_function_declaration(parser: &mut AstParser) -> Result<FunctionDecl
         loop {
             // Validate if we got an identifier expression
             let expression_statement = parse_identifier_expression_statement(parser)?;
-            // let node = AstNode::ExpressionStatement(param);
+
+            dbg!(&expression_statement);
 
             let identifier = match expression_statement.expression {
                 Expression::Identifier(id) => id.identifier,
@@ -134,3 +135,72 @@ pub fn parse_function_declaration(parser: &mut AstParser) -> Result<FunctionDecl
     })
 }
 
+#[cfg(test)]
+mod tests {
+    use crate::{tokenizer, ast::{parser::AstParser, AstErrorType}};
+
+    use super::{is_function_declaration, parse_function_declaration};
+
+    #[test]
+    fn function_keyword_is_start_function_declaration() {
+        let content = String::from("function");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let parser = AstParser::new(&tokens);
+
+        let result = is_function_declaration(&parser);
+
+        assert_eq!(result, true);
+    }
+    
+    #[test]
+    fn string_is_not_a_start_function_declaration() {
+        let content = String::from("'Foobar'");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let parser = AstParser::new(&tokens);
+
+        let result = is_function_declaration(&parser);
+
+        assert_eq!(result, false);
+    }
+
+    #[test]
+    fn valid_function_parses_as_a_function() {
+        let content = String::from("function x() {}");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let mut parser = AstParser::new(&tokens);
+
+        let result = parse_function_declaration(&mut parser).unwrap();
+
+        assert_eq!(result.id.name, "x");
+        assert_eq!(result.params.len(), 0);
+    }
+
+    #[test]
+    fn valid_function_with_params_parses_as_a_function() {
+        let content = String::from("function x(x, y, z) {}");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let mut parser = AstParser::new(&tokens);
+
+        let result = parse_function_declaration(&mut parser).unwrap();
+
+        assert_eq!(result.id.name, "x");
+        assert_eq!(result.params.len(), 3);
+    }
+
+    #[test]
+    fn not_valid_function_gives_an_error() {
+        let content = String::from("function x(123) {}");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let mut parser = AstParser::new(&tokens);
+
+        let result = parse_function_declaration(&mut parser).unwrap_err();
+
+        assert_eq!(result.error_type, AstErrorType::UnexpectedToken);
+    }
+
+}

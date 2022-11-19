@@ -8,6 +8,8 @@ pub fn is_identifier_expression_statement(parser: &AstParser) -> bool {
 }
 
 pub fn parse_identifier_expression_statement(parser: &mut AstParser) -> Result<ExpressionStatement, AstParseError> {
+    if !is_identifier_expression_statement(parser) { return ast_error!(AstErrorType::UnexpectedToken, parser) }
+
     let handle_identifier_token = |parser: &mut AstParser| -> Result<Identifier, AstParseError> {
         match parser.token() {
             Some(token) => Ok(Identifier::from(token)),
@@ -60,6 +62,19 @@ mod tests {
         assert_eq!(result, false);
     }
 
+    
+    #[test]
+    fn number_is_not_a_identifier_statement() {
+        let content = String::from("123");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let parser = AstParser::new(&tokens);
+
+        let result = is_identifier_expression_statement(&parser);
+
+        assert_eq!(result, false);
+    }
+
     #[test]
     fn identifier_is_parsable_identifier_expression() {
         let content = String::from("foobar");
@@ -102,5 +117,4 @@ mod tests {
             panic!("Invalid return value");
         }
     }
-
 }
