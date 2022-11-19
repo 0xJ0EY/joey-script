@@ -1,2 +1,3 @@
-"Hello world";
-"Goodbye world"
+function foo() {
+    function bar() {}
+}

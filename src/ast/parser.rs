@@ -1,6 +1,6 @@
 use crate::tokenizer::{Token, TokenType, Separator};
 
-use super::{AstParseError, Program, AstErrorType, nodes::AstNode, parsers::{expression_statements::{parse_expression_statement, is_expression_statement}, block_statements::{is_closed_block_statement, is_open_block_statement, parse_block_statement}}};
+use super::{AstParseError, Program, AstErrorType, nodes::{AstNode, function_declaration}, parsers::{expression_statements::{parse_expression_statement, is_expression_statement}, block_statements::{is_closed_block_statement, is_open_block_statement, parse_block_statement}, function_declaration::{is_function_declaration, parse_function_declaration}}};
 
 #[derive(Debug)]
 pub struct AstParser<'a> {
@@ -79,7 +79,13 @@ impl<'a> AstParser<'a> {
     }
 
     fn parse(&mut self) -> Result<AstNode, AstParseError> {
-        if is_expression_statement(self) {
+        
+        if is_function_declaration(&self) {
+            let function_declaration = parse_function_declaration(self)?;
+            return Ok(AstNode::FunctionDeclaration(function_declaration));
+        }
+
+        if is_expression_statement(&self) {
             let expression_statement = parse_expression_statement(self)?;
             return Ok(AstNode::ExpressionStatement(expression_statement));
         }

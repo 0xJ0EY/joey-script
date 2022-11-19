@@ -1,7 +1,7 @@
 use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::{expression_statement::{ExpressionStatement, LiteralExpression, Expression}, Literal}, AstErrorType}};
 
 pub fn is_literal_expression_statement(parser: &AstParser) -> bool {
-    return match parser.token() {
+    match parser.token() {
         Some(token) => matches!(token.token_type, TokenType::Literal(_)),
         None => false,
     }
