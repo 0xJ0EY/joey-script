@@ -14,12 +14,23 @@ pub struct BinaryExpression {
 
 #[derive(Debug)]
 pub struct CallExpression {
-    
+    pub callee: Identifier,
+    pub arguments: Vec<Expression>,
 }
 
 #[derive(Debug)]
 pub struct ObjectExpression {
     
+}
+
+#[derive(Debug)]
+pub struct ArrayExpression {
+
+}
+
+#[derive(Debug)]
+pub struct SequenceExpression {
+
 }
 
 #[derive(Debug)]
@@ -34,6 +45,8 @@ pub enum Expression {
     BinaryExpression(BinaryExpression),
     CallExpression(CallExpression),
     ObjectExpression(ObjectExpression),
+    SequenceExpression(SequenceExpression),
+    ArrayExpression(ArrayExpression),
 }
 
 #[derive(Debug)]

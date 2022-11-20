@@ -1,43 +1,12 @@
-use crate::{ast::{AstParseError, parser::AstParser, nodes::{function_declaration::FunctionDeclaration, expression_statement::Expression, Identifier, block_statement::BlockStatement}, AstErrorType, parsers::block_statements::parse_block_statement}, tokenizer::{TokenType, Separator}, ast_error};
+use crate::{ast::{AstParseError, parser::AstParser, nodes::{function_declaration::FunctionDeclaration, expression_statement::Expression, Identifier, block_statement::BlockStatement}, AstErrorType, parsers::{block_statements::parse_block_statement, util::{is_closed_param_bracket, is_param_separator}}}, tokenizer::{TokenType, Separator}, ast_error};
 
-use super::{get_start_position, get_end_position_of_previous_token, expression_statements::{identifier_expression::parse_identifier_expression_statement}};
+use super::{get_start_position, get_end_position_of_previous_token, expression_statements::{identifier_expression::parse_identifier_expression_statement}, util::{parse_function_name, is_open_param_bracket}};
 
 pub fn is_function_declaration(parser: &AstParser) -> bool {
     match parser.token() {
         Some(token) => {
             let is_type = matches!(token.token_type, TokenType::Keyword);
             let is_value = token.value == "function";
-
-            is_type && is_value
-        },
-        None => false,
-    }
-}
-
-fn is_open_param_bracket(parser: &mut AstParser) -> bool {
-    match parser.token() {
-        Some(token) => {
-            let is_type = matches!(token.token_type, TokenType::Separator(Separator::Parenthesis));
-            let is_value = token.value == "(";
-
-            is_type && is_value
-        },
-        None => false,
-    }
-}
-
-fn is_param_separator(parser: &mut AstParser) -> bool {
-    match parser.token() {
-        Some(token) => matches!(token.token_type, TokenType::Separator(Separator::Comma)),
-        None => false,
-    }
-}
-
-fn is_closed_param_bracket(parser: &mut AstParser) -> bool {
-    match parser.token() {
-        Some(token) => {
-            let is_type = matches!(token.token_type, TokenType::Separator(Separator::Parenthesis));
-            let is_value = token.value == ")";
 
             is_type && is_value
         },
@@ -53,15 +22,6 @@ pub fn parse_function_declaration(parser: &mut AstParser) -> Result<FunctionDecl
         parser.next();
 
         Ok(())
-    };
-
-    let parse_function_name = |parser: &mut AstParser| -> Result<Identifier, AstParseError> {
-        let expression = parse_identifier_expression_statement(parser)?;
-
-        match expression.expression {
-            Expression::Identifier(id) => Ok(id.identifier),
-            _ => return ast_error!(AstErrorType::UnexpectedToken, parser)
-        }
     };
 
     let parse_parameters = |parser: &mut AstParser| -> Result<Vec<Identifier>, AstParseError> {

@@ -1,6 +1,6 @@
 use crate::tokenizer::{Token, TokenType, Separator};
 
-use super::{AstParseError, Program, AstErrorType, nodes::{AstNode, function_declaration}, parsers::{expression_statements::{parse_expression_statement, is_expression_statement}, block_statements::{is_closed_block_statement, is_open_block_statement, parse_block_statement}, function_declaration::{is_function_declaration, parse_function_declaration}}};
+use super::{AstParseError, Program, AstErrorType, nodes::{AstNode}, parsers::{expression_statements::{parse_expression_statement, is_expression_statement}, block_statements::{is_closed_block_statement, is_open_block_statement, parse_block_statement}, function_declaration::{is_function_declaration, parse_function_declaration}, util::is_semicolon_terminator}};
 
 #[derive(Debug)]
 pub struct AstParser<'a> {
@@ -59,8 +59,8 @@ impl<'a> AstParser<'a> {
     pub fn can_insert_automatic_semicolon(&self, index: usize) -> bool {
         // https://262.ecma-international.org/13.0/#sec-rules-of-automatic-semicolon-insertion
         // TODO: missing "The previous token is ) and the inserted semicolon would then be parsed as the terminating semicolon of a do-while statement (14.7.2)."
-        let current_token   = self.tokens.get(index);
-        let offending_token = self.tokens.get(index + 1);
+        let current_token   = self.tokens.get(index - 1);
+        let offending_token = self.tokens.get(index);
 
         if current_token.is_none() || offending_token.is_none() { return false; }
 
@@ -79,7 +79,6 @@ impl<'a> AstParser<'a> {
     }
 
     fn parse(&mut self) -> Result<AstNode, AstParseError> {
-        
         if is_function_declaration(&self) {
             let function_declaration = parse_function_declaration(self)?;
             return Ok(AstNode::FunctionDeclaration(function_declaration));
@@ -100,6 +99,11 @@ impl<'a> AstParser<'a> {
         let mut body: Vec<AstNode> = Vec::new();
 
         while self.has_tokens() {
+            if is_semicolon_terminator(&self) {
+                self.next();
+                continue;
+            }
+
             if is_closed_block_statement(self) {
                 return Err(AstParseError {
                     index: self.get_current_index(),
@@ -126,6 +130,11 @@ impl<'a> AstParser<'a> {
         let mut body = Vec::new();
 
         while self.has_tokens() {
+            if is_semicolon_terminator(&self) {
+                self.next();
+                continue;
+            }
+
             if is_closed_block_statement(self) {
                 self.next();
                 return Ok(body);

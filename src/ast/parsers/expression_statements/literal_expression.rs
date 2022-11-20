@@ -1,4 +1,6 @@
-use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::{expression_statement::{ExpressionStatement, LiteralExpression, Expression}, Literal}, AstErrorType}};
+use crate::{tokenizer::TokenType, ast::{parser::AstParser, AstParseError, nodes::{expression_statement::{ExpressionStatement, LiteralExpression, Expression}, Literal}, AstErrorType}, ast_error};
+
+use super::check_if_expression_has_ended;
 
 pub fn is_literal_expression_statement(parser: &AstParser) -> bool {
     match parser.token() {
@@ -15,37 +17,15 @@ pub fn parse_literal_expression_statement(parser: &mut AstParser) -> Result<Expr
         }
     };
 
-    let handle_end_marker = |parser: &mut AstParser| {
-        let end_marker = parser.token();
-
-        if end_marker.is_some() {
-            let end_marker = end_marker.unwrap();
-
-            if !matches!(end_marker.token_type, TokenType::Separator(Separator::Terminator)) {
-                // Check if we can insert an automatic semicolon
-                let index_of_literal = parser.get_current_index() - 1;
-                
-                if !parser.can_insert_automatic_semicolon(index_of_literal) {
-                    return Err(AstParseError { index: parser.get_current_index(), error_type: AstErrorType::UnexpectedToken });
-                }
-            } else {
-                let end = end_marker.range.1.clone();
-                parser.next();
-
-                return Ok(Some(end));
-            }
-        }
-
-        Ok(None)
-    };
-    
     let literal_token = handle_literal_token(parser)?;
     parser.next();
 
-    let end_marker= handle_end_marker(parser)?;
+    if !check_if_expression_has_ended(parser) {
+        return ast_error!(AstErrorType::UnexpectedToken, parser);
+    }
 
     let start   = literal_token.range.0;
-    let end     = end_marker.unwrap_or(literal_token.range.1);
+    let end     = literal_token.range.1;
 
     let expression = LiteralExpression { value: literal_token };
 
@@ -53,7 +33,6 @@ pub fn parse_literal_expression_statement(parser: &mut AstParser) -> Result<Expr
         expression: Expression::Literal(expression),
         range: (start, end),
     })
-
 }
 
 #[cfg(test)]
@@ -173,6 +152,8 @@ mod tests {
         let mut parser = AstParser::new(&tokens);
 
         _ = parse_literal_expression_statement(&mut parser).unwrap();
+        parser.next(); // Skip the ;
+
         let result = parse_literal_expression_statement(&mut parser).unwrap();
 
         if let Expression::Literal(expression) = result.expression {
@@ -181,7 +162,7 @@ mod tests {
             assert_eq!(literal.range.1, 14);
             assert_eq!(literal.value, "Bar");
     
-            assert_eq!(parser.get_current_index(), 4);
+            assert_eq!(parser.get_current_index(), 3);
         } else {
             panic!("Invalid return value");
         }
@@ -195,7 +176,11 @@ mod tests {
         let mut parser = AstParser::new(&tokens);
 
         _ = parse_literal_expression_statement(&mut parser).unwrap();
+        parser.next(); // Skip the ;
+
         _ = parse_literal_expression_statement(&mut parser).unwrap();
+        parser.next(); // Skip the ;
+
         let result = parse_literal_expression_statement(&mut parser).unwrap();
 
         if let Expression::Literal(expression) = result.expression {
@@ -204,7 +189,7 @@ mod tests {
             assert_eq!(literal.range.1, 20);
             assert_eq!(literal.value, "Foo");
     
-            assert_eq!(parser.get_current_index(), 6);
+            assert_eq!(parser.get_current_index(), 5);
         } else {
             panic!("Invalid return value");
         }

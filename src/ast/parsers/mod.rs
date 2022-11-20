@@ -3,6 +3,7 @@ use super::{AstParseError, parser::AstParser, AstErrorType};
 pub mod expression_statements;
 pub mod block_statements;
 pub mod function_declaration;
+pub mod util;
 
 #[macro_export]
 macro_rules! ast_error {
