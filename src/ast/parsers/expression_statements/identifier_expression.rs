@@ -1,9 +1,45 @@
-use crate::{ast::{parser::AstParser, nodes::{expression_statement::{ExpressionStatement, IdentifierExpression, Expression}, Identifier}, AstParseError, AstErrorType}, tokenizer::{TokenType}, ast_error};
+use crate::{ast::{parser::AstParser, nodes::{expression_statement::{ExpressionStatement, IdentifierExpression, Expression}, Identifier}, AstParseError, AstErrorType, parsers::{block_statements::is_closed_block_statement, util::{is_open_param_bracket, is_closed_param_bracket}}}, tokenizer::{TokenType, Separator}, ast_error};
 
 pub fn is_identifier_expression_statement(parser: &AstParser) -> bool {
     match parser.token() {
         Some(token) => matches!(token.token_type, TokenType::Identifier),
         None => false,
+    }
+}
+
+fn check_if_identifier_expression_has_ended(parser: &mut AstParser) -> bool {
+    let end_marker = parser.token();
+
+    match end_marker {
+        Some(marker) => {
+            if matches!(marker.token_type, TokenType::Separator(Separator::Terminator)) {
+                return true;
+            }
+
+            if matches!(marker.token_type, TokenType::Separator(Separator::Comma)) {
+                return true;
+            }
+
+            if is_open_param_bracket(parser) {
+                return true;
+            }
+
+            if is_closed_param_bracket(parser) {
+                return true;
+            }
+
+            if is_closed_block_statement(parser) {
+                return true;
+            }
+            
+            let index = parser.get_current_index() ;
+            if index > 0 && parser.can_insert_automatic_semicolon(index) {
+                return true;
+            }
+
+            return false
+        },
+        None => return true,
     }
 }
 
@@ -21,6 +57,10 @@ pub fn parse_identifier_expression_statement(parser: &mut AstParser) -> Result<E
     
     parser.next();
 
+    if !check_if_identifier_expression_has_ended(parser) {
+        return ast_error!(AstErrorType::UnexpectedToken, parser);
+    }
+
     let start   = identifier.range.0;
     let end     = identifier.range.1;
 
@@ -34,7 +74,7 @@ pub fn parse_identifier_expression_statement(parser: &mut AstParser) -> Result<E
 
 #[cfg(test)]
 mod tests {
-    use crate::{tokenizer, ast::{parser::AstParser, nodes::expression_statement::Expression, parsers::expression_statements::identifier_expression::is_identifier_expression_statement}};
+    use crate::{tokenizer, ast::{parser::AstParser, nodes::expression_statement::Expression, parsers::expression_statements::identifier_expression::is_identifier_expression_statement, AstErrorType}};
 
     use super::parse_identifier_expression_statement;
 
@@ -94,6 +134,18 @@ mod tests {
         } else {
             panic!("Invalid return value");
         }
+    }
+
+    #[test]
+    fn multiple_wrong_separated_is_not_parsable_identifier_expression() {
+        let content = String::from("foobar foo");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let mut parser = AstParser::new(&tokens);
+
+        let result = parse_identifier_expression_statement(&mut parser).unwrap_err();
+
+        assert_eq!(result.error_type, AstErrorType::UnexpectedToken);
     }
 
     #[test]
