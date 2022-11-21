@@ -13,6 +13,12 @@ pub enum AstErrorType {
 }
 
 #[derive(Debug)]
+pub struct SearchResult<T> {
+    pub value: T,
+    pub ast_range: (usize, usize)
+}
+
+#[derive(Debug)]
 pub struct AstParseError {
     pub index: usize,
     pub error_type: AstErrorType, 

@@ -1,11 +1,79 @@
-use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::{expression_statement::{ExpressionStatement, LiteralExpression, Expression}, Literal}, AstErrorType, parsers::block_statements::is_closed_block_statement}, ast_error};
+use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::{expression_statement::{ExpressionStatement, LiteralExpression, Expression}, Literal}, AstErrorType, parsers::block_statements::is_closed_block_statement, SearchResult}, ast_error};
+
+use super::FindResult;
 
 pub fn is_literal_expression_statement(parser: &AstParser) -> bool {
-    match parser.token() {
-        Some(token) => matches!(token.token_type, TokenType::Literal(_)),
-        None => false,
-    }
+    find_literal_expression_statement(parser).is_ok()
 }
+
+pub fn find_literal_expression_statement(parser: &AstParser) -> FindResult<ExpressionStatement> {
+    let handle_literal_token = |parser: &AstParser| {
+        match parser.token() {
+            Some(token) => {
+
+                if !matches!(token.token_type, TokenType::Literal(_)) {
+                    return ast_error!(AstErrorType::UnexpectedToken, parser);
+                }
+
+                Ok(Literal::from(token))
+            },
+            None => return ast_error!(AstErrorType::UnexpectedToken, parser),
+        }
+    };
+
+    let check_if_expression_has_ended = |parser: &AstParser| -> bool {
+        let end_marker = parser.peek();
+
+        match end_marker {
+            Some(marker) => {
+                if matches!(marker.token_type, TokenType::Separator(Separator::Terminator)) {
+                    return true;
+                }
+    
+                if matches!(marker.token_type, TokenType::Separator(Separator::Comma)) {
+                    return true;
+                }
+    
+                if is_closed_block_statement(parser) {
+                    return true;
+                }
+    
+                let index = parser.get_current_index() + 1;
+                if index > 0 && parser.can_insert_automatic_semicolon(index) {
+                    return true;
+                }
+    
+                return false
+            },
+            None => return true,
+        }
+    };
+    
+    let token = handle_literal_token(parser)?;
+    
+    if !check_if_expression_has_ended(parser) {
+        return ast_error!(AstErrorType::UnexpectedToken, parser);
+    }
+
+    let literal_start   = token.range.0;
+    let literal_end     = token.range.1;
+
+    let ast_start = parser.get_current_index();
+    let ast_end         = ast_start + 1;
+
+    let expression = LiteralExpression { value: token };
+
+    let expression_statement = ExpressionStatement {
+        expression: Expression::Literal(expression),
+        range: (literal_start, literal_end),
+    };
+
+    Ok(SearchResult::<ExpressionStatement> {
+        value: expression_statement,
+        ast_range: (ast_start, ast_end)
+    })
+}
+
 
 fn check_if_literal_expression_has_ended(parser: &mut AstParser) -> bool {
     let end_marker = parser.token();
@@ -35,6 +103,7 @@ fn check_if_literal_expression_has_ended(parser: &mut AstParser) -> bool {
     }
 }
 
+
 pub fn parse_literal_expression_statement(parser: &mut AstParser) -> Result<ExpressionStatement, AstParseError> {
     let handle_literal_token = |parser: &mut AstParser| {
         match parser.token() {
@@ -63,7 +132,7 @@ pub fn parse_literal_expression_statement(parser: &mut AstParser) -> Result<Expr
 
 #[cfg(test)]
 mod tests {
-    use crate::{tokenizer, ast::{parser::AstParser, nodes::expression_statement::Expression, parsers::expression_statements::literal_expression::is_literal_expression_statement}};
+    use crate::{tokenizer, ast::{parser::AstParser, nodes::expression_statement::Expression, parsers::expression_statements::literal_expression::{is_literal_expression_statement, find_literal_expression_statement}}};
 
     use super::parse_literal_expression_statement;
 
