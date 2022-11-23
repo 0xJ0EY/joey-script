@@ -1,6 +1,6 @@
-use crate::{ast::{parser::AstParser, nodes::{Identifier, expression_statement::Expression}, AstParseError, AstErrorType}, tokenizer::{TokenType, Separator}, ast_error};
+use crate::{ast::{parser::AstParser, nodes::Identifier, AstParseError}, tokenizer::{TokenType, Separator}};
 
-use super::expression_statements::identifier_expression::{self, parse_identifier_expression_statement};
+use super::parts::identifier::parse_identifier;
 
 // Parsing util functions
 pub fn is_open_param_bracket(parser: &AstParser, index: usize) -> bool {
@@ -35,12 +35,7 @@ pub fn is_closed_param_bracket(parser: &AstParser, index: usize) -> bool {
 }
 
 pub fn parse_function_name(parser: &mut AstParser) -> Result<Identifier, AstParseError> {
-    let expression = parse_identifier_expression_statement(parser)?;
-
-    match expression.expression {
-        Expression::Identifier(id) => Ok(id.identifier),
-        _ => return ast_error!(AstErrorType::UnexpectedToken, parser)
-    }
+    Ok(parse_identifier(parser)?)
 }
 
 pub fn is_semicolon_terminator(parser: &AstParser) -> bool {

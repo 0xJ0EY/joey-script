@@ -1,4 +1,4 @@
-use crate::{ast::{parser::AstParser, nodes::{expression_statement::{ExpressionStatement, IdentifierExpression, Expression}, Identifier}, AstParseError, AstErrorType, parsers::{block_statements::is_closed_block_statement, util::{is_open_param_bracket, is_closed_param_bracket}}, SearchResult}, tokenizer::{TokenType, Separator}, ast_error};
+use crate::{ast::{parser::AstParser, nodes::{expression_statement::{ExpressionStatement, IdentifierExpression, Expression}, Identifier}, AstParseError, AstErrorType, parsers::{block_statements::is_closed_block_statement, util::{is_open_param_bracket, is_closed_param_bracket}, parts::identifier::parse_identifier}, SearchResult}, tokenizer::{TokenType, Separator}, ast_error};
 
 use super::{FindResult, consume_result};
 
@@ -12,19 +12,6 @@ pub fn is_identifier_expression_statement(parser: &AstParser) -> bool {
 }
 
 pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
-    let handle_identifier_token = |parser: &AstParser| -> Result<Identifier, AstParseError> {
-        match parser.token() {
-            Some(token) => {
-                if !matches!(token.token_type, TokenType::Identifier) {
-                    return ast_error!(AstErrorType::UnexpectedToken, parser);
-                }
-
-                Ok(Identifier::from(token))
-            },
-            None => ast_error!(AstErrorType::UnexpectedToken, parser)
-        }
-    };
-
     let check_if_identifier_expression_has_ended = |parser: &AstParser| -> bool {
         let end_marker = parser.peek();
     
@@ -58,7 +45,7 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
         }
     };
 
-    let identifier = handle_identifier_token(parser)?;
+    let identifier = parse_identifier(parser)?;
 
     if !check_if_identifier_expression_has_ended(parser) {
         return ast_error!(AstErrorType::UnexpectedToken, parser);
@@ -81,16 +68,6 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
         value: expression_statement,
         ast_range: (ast_start, ast_end),
     }))
-}
-
-pub fn parse_identifier_expression_statement(parser: &mut AstParser) -> Result<ExpressionStatement, AstParseError> {    
-    let result = find(parser)?;
-
-    if result.is_none() {
-        return ast_error!(AstErrorType::UnexpectedToken, parser);
-    }
-
-    return Ok(consume_result(parser, result.unwrap()));
 }
 
 #[cfg(test)]

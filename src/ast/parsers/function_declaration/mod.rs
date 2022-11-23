@@ -1,6 +1,6 @@
-use crate::{ast::{AstParseError, parser::AstParser, nodes::{function_declaration::FunctionDeclaration, expression_statement::Expression, Identifier, block_statement::BlockStatement}, AstErrorType, parsers::{block_statements::parse_block_statement, util::{is_closed_param_bracket, is_param_separator}}}, tokenizer::{TokenType, Separator}, ast_error};
+use crate::{ast::{AstParseError, parser::AstParser, nodes::{function_declaration::FunctionDeclaration, expression_statement::Expression, Identifier, block_statement::BlockStatement}, AstErrorType, parsers::{block_statements::parse_block_statement, util::{is_closed_param_bracket, is_param_separator}, parts::identifier::parse_identifier}}, tokenizer::{TokenType, Separator}, ast_error};
 
-use super::{get_start_position, get_end_position_of_previous_token, expression_statements::{identifier_expression::parse_identifier_expression_statement}, util::{parse_function_name, is_open_param_bracket}};
+use super::{get_start_position, get_end_position_of_previous_token, util::{parse_function_name, is_open_param_bracket}};
 
 pub fn is_function_declaration(parser: &AstParser) -> bool {
     match parser.token() {
@@ -39,16 +39,10 @@ pub fn parse_function_declaration(parser: &mut AstParser) -> Result<FunctionDecl
 
         loop {
             // Validate if we got an identifier expression
-            let expression_statement = parse_identifier_expression_statement(parser)?;
-
-            dbg!(&expression_statement);
-
-            let identifier = match expression_statement.expression {
-                Expression::Identifier(id) => id.identifier,
-                _ => return ast_error!(AstErrorType::UnexpectedToken, parser)
-            };
-
+            let identifier = parse_identifier(parser)?;
             params.push(identifier);
+
+            parser.next();
 
             // Validate if we have a closing bracket, if so close the loop
             if is_closed_param_bracket(parser, parser.get_current_index()) {
@@ -81,6 +75,7 @@ pub fn parse_function_declaration(parser: &mut AstParser) -> Result<FunctionDecl
 
     // 2. Parse the function name
     let function_name = parse_function_name(parser)?;
+    parser.next(); // Temporary until rewrite
 
     dbg!(&function_name);
 

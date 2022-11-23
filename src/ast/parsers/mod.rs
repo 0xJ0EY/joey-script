@@ -1,5 +1,6 @@
 use super::{AstParseError, parser::AstParser, AstErrorType};
 
+mod parts;
 pub mod expression_statements;
 pub mod block_statements;
 pub mod function_declaration;

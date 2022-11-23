@@ -1,4 +1,4 @@
-use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::{expression_statement::{ExpressionStatement, LiteralExpression, Expression}, Literal}, AstErrorType, parsers::block_statements::is_closed_block_statement, SearchResult}, ast_error, handle_allowed_find_error};
+use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::{expression_statement::{ExpressionStatement, LiteralExpression, Expression}, Literal}, AstErrorType, parsers::{block_statements::is_closed_block_statement, parts::literal::parse_literal}, SearchResult}, ast_error, handle_allowed_find_error};
 
 use super::FindResult;
 
@@ -12,19 +12,6 @@ pub fn is_literal_expression_statement(parser: &AstParser) -> bool {
 }
 
 pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
-    let handle_literal_token = |parser: &AstParser| {
-        match parser.token() {
-            Some(token) => {
-                if !matches!(token.token_type, TokenType::Literal(_)) {
-                    return ast_error!(AstErrorType::UnexpectedToken, parser);
-                }
-
-                Ok(Literal::from(token))
-            },
-            None => return ast_error!(AstErrorType::UnexpectedToken, parser),
-        }
-    };
-
     let check_if_expression_has_ended = |parser: &AstParser| -> bool {
         let end_marker = parser.peek();
 
@@ -49,7 +36,7 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
         }
     };
     
-    let token = handle_allowed_find_error!(handle_literal_token(parser));
+    let token = handle_allowed_find_error!(parse_literal(parser));
     
     if !check_if_expression_has_ended(parser) {
         return ast_error!(AstErrorType::UnexpectedToken, parser);
