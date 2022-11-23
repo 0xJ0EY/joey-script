@@ -4,12 +4,11 @@ use super::FindResult;
 
 pub fn is_literal_expression_statement(parser: &AstParser) -> bool {
     // TODO: Maybe change this to only look for the most basic parts of a literal (the first token)
-    
     if let Ok(response) = find(parser) {
-        return response.is_some()
+        return response.is_some();
     }
 
-    return false
+    false
 }
 
 pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
@@ -39,10 +38,6 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
                     return true;
                 }
     
-                if is_closed_block_statement(parser) {
-                    return true;
-                }
-    
                 let index = parser.get_current_index() + 1;
                 if index > 0 && parser.can_insert_automatic_semicolon(index) {
                     return true;
@@ -63,7 +58,7 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
     let literal_start   = token.range.0;
     let literal_end     = token.range.1;
 
-    let ast_start = parser.get_current_index();
+    let ast_start       = parser.get_current_index();
     let ast_end         = ast_start + 1;
 
     let expression = LiteralExpression { value: token };

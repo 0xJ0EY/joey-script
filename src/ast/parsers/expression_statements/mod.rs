@@ -1,6 +1,6 @@
 use crate::{ast::{parser::AstParser, AstParseError, nodes::expression_statement::ExpressionStatement, AstErrorType, SearchResult}, ast_error};
 
-use self::{literal_expression::{is_literal_expression_statement}, identifier_expression::{is_identifier_expression_statement, parse_identifier_expression_statement}, call_expression::{is_call_expression_statement, parse_call_expression_statement}, sequence_expression::is_sequence_expression_statement};
+use self::{literal_expression::{is_literal_expression_statement}, identifier_expression::is_identifier_expression_statement, call_expression::{is_call_expression_statement, parse_call_expression_statement}, sequence_expression::is_sequence_expression_statement};
 
 pub mod identifier_expression;
 pub mod literal_expression;
@@ -40,8 +40,8 @@ pub fn parse_expression_statement(parser: &mut AstParser) -> Result<ExpressionSt
         return Ok(consume_result(parser, result));
     }
 
-    if is_identifier_expression_statement(parser) {
-        return parse_identifier_expression_statement(parser);
+    if let Some(result) = identifier_expression::find(parser)? {
+        return Ok(consume_result(parser, result));
     }
 
     return ast_error!(AstErrorType::UnexpectedToken, parser);

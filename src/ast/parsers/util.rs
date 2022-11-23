@@ -1,11 +1,10 @@
 use crate::{ast::{parser::AstParser, nodes::{Identifier, expression_statement::Expression}, AstParseError, AstErrorType}, tokenizer::{TokenType, Separator}, ast_error};
 
-use super::expression_statements::identifier_expression::parse_identifier_expression_statement;
-
+use super::expression_statements::identifier_expression::{self, parse_identifier_expression_statement};
 
 // Parsing util functions
-pub fn is_open_param_bracket(parser: &mut AstParser) -> bool {
-    match parser.token() {
+pub fn is_open_param_bracket(parser: &AstParser, index: usize) -> bool {
+    match parser.token_at(index) {
         Some(token) => {
             let is_type = matches!(token.token_type, TokenType::Separator(Separator::Parenthesis));
             let is_value = token.value == "(";
@@ -16,15 +15,15 @@ pub fn is_open_param_bracket(parser: &mut AstParser) -> bool {
     }
 }
 
-pub fn is_param_separator(parser: &mut AstParser) -> bool {
-    match parser.token() {
+pub fn is_param_separator(parser: &AstParser, index: usize) -> bool {
+    match parser.token_at(index) {
         Some(token) => matches!(token.token_type, TokenType::Separator(Separator::Comma)),
         None => false,
     }
 }
 
-pub fn is_closed_param_bracket(parser: &mut AstParser) -> bool {
-    match parser.token() {
+pub fn is_closed_param_bracket(parser: &AstParser, index: usize) -> bool {
+    match parser.token_at(index) {
         Some(token) => {
             let is_type = matches!(token.token_type, TokenType::Separator(Separator::Parenthesis));
             let is_value = token.value == ")";

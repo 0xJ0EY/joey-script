@@ -25,14 +25,14 @@ pub fn parse_function_declaration(parser: &mut AstParser) -> Result<FunctionDecl
     };
 
     let parse_parameters = |parser: &mut AstParser| -> Result<Vec<Identifier>, AstParseError> {
-        if !is_open_param_bracket(parser) { return ast_error!(AstErrorType::UnexpectedToken, parser) }
+        if !is_open_param_bracket(parser, parser.get_current_index()) { return ast_error!(AstErrorType::UnexpectedToken, parser) }
         let mut params = Vec::<Identifier>::new();
 
         // Skip opening bracket
         parser.next();
 
         // Exit early if we don't have any params
-        if is_closed_param_bracket(parser) {
+        if is_closed_param_bracket(parser, parser.get_current_index()) {
             parser.next();
             return Ok(params);
         }
@@ -51,13 +51,13 @@ pub fn parse_function_declaration(parser: &mut AstParser) -> Result<FunctionDecl
             params.push(identifier);
 
             // Validate if we have a closing bracket, if so close the loop
-            if is_closed_param_bracket(parser) {
+            if is_closed_param_bracket(parser, parser.get_current_index()) {
                 parser.next();
                 break;
             }
 
             // Validate if we have "," separator
-            if is_param_separator(parser) {
+            if is_param_separator(parser, parser.get_current_index()) {
                 parser.next();
                 continue;
             }
@@ -74,11 +74,15 @@ pub fn parse_function_declaration(parser: &mut AstParser) -> Result<FunctionDecl
 
     let start = get_start_position(parser)?;
 
+    dbg!(start);
+
     // 1. Parse the function keyword
     _ = parse_function_keyword(parser)?;
 
     // 2. Parse the function name
     let function_name = parse_function_name(parser)?;
+
+    dbg!(&function_name);
 
     // 3. Parse the parameters
     let params = parse_parameters(parser)?;
