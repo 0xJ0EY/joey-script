@@ -1,4 +1,4 @@
-use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::{expression_statement::{ExpressionStatement, LiteralExpression, Expression}, Literal}, AstErrorType, parsers::{block_statements::is_closed_block_statement, parts::literal::parse_literal}, SearchResult}, ast_error, handle_allowed_find_error};
+use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::{expression_statement::{ExpressionStatement, LiteralExpression, Expression}}, AstErrorType, parsers::{parts::literal::parse_literal}, SearchResult}, ast_error, handle_allowed_find_error};
 
 use super::FindResult;
 

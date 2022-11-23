@@ -1,6 +1,6 @@
-use crate::{ast::{parser::AstParser, nodes::{expression_statement::{ExpressionStatement, IdentifierExpression, Expression}, Identifier}, AstParseError, AstErrorType, parsers::{block_statements::is_closed_block_statement, util::{is_open_param_bracket, is_closed_param_bracket}, parts::identifier::parse_identifier}, SearchResult}, tokenizer::{TokenType, Separator}, ast_error};
+use crate::{ast::{parser::AstParser, nodes::expression_statement::{ExpressionStatement, IdentifierExpression, Expression}, AstParseError, AstErrorType, parsers::{util::{is_open_param_bracket, is_closed_param_bracket}, parts::identifier::parse_identifier}, SearchResult}, tokenizer::{TokenType, Separator}, ast_error};
 
-use super::{FindResult, consume_result};
+use super::FindResult;
 
 pub fn is_identifier_expression_statement(parser: &AstParser) -> bool {
     // TODO: Maybe change this to only look for the most basic parts of a identifier (the first token)
