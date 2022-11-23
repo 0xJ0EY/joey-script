@@ -44,6 +44,10 @@ impl<'a> AstParser<'a> {
         return self.index;
     }
 
+    pub fn consume_range(&mut self, range: usize) {
+        self.index += range;
+    }
+
     pub fn consume(&mut self) -> Option<&Token> {
         let value = self.tokens.get(self.index);
 
