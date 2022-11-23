@@ -12,7 +12,9 @@ pub fn is_literal_expression_statement(parser: &AstParser) -> bool {
 }
 
 pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
-    let check_if_expression_has_ended = |parser: &AstParser| -> bool {
+    let start_index = parser.get_current_index();
+
+    let check_if_expression_has_ended = |parser: &AstParser, start_index: usize| -> bool {
         let end_marker = parser.peek();
 
         match end_marker {
@@ -25,7 +27,7 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
                     return true;
                 }
     
-                let index = parser.get_current_index() + 1;
+                let index = start_index + 1;
                 if index > 0 && parser.can_insert_automatic_semicolon(index) {
                     return true;
                 }
@@ -36,9 +38,9 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
         }
     };
     
-    let token = handle_allowed_find_error!(parse_literal(parser));
+    let token = handle_allowed_find_error!(parse_literal(parser, start_index));
     
-    if !check_if_expression_has_ended(parser) {
+    if !check_if_expression_has_ended(parser, start_index) {
         return ast_error!(AstErrorType::UnexpectedToken, parser);
     }
 

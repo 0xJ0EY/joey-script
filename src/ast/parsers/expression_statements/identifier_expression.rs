@@ -12,7 +12,9 @@ pub fn is_identifier_expression_statement(parser: &AstParser) -> bool {
 }
 
 pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
-    let check_if_identifier_expression_has_ended = |parser: &AstParser| -> bool {
+    let start_index = parser.get_current_index();
+    
+    let check_if_identifier_expression_has_ended = |parser: &AstParser, start_index: usize| -> bool {
         let end_marker = parser.peek();
     
         match end_marker {
@@ -25,7 +27,7 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
                     return true;
                 }
 
-                let index = parser.get_current_index() + 1;
+                let index = start_index + 1;
 
                 if is_open_param_bracket(parser, index) {
                     return true;
@@ -45,9 +47,9 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
         }
     };
 
-    let identifier = parse_identifier(parser)?;
+    let identifier = parse_identifier(parser, start_index)?;
 
-    if !check_if_identifier_expression_has_ended(parser) {
+    if !check_if_identifier_expression_has_ended(parser, start_index) {
         return ast_error!(AstErrorType::UnexpectedToken, parser);
     }
 

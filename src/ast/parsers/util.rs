@@ -35,7 +35,7 @@ pub fn is_closed_param_bracket(parser: &AstParser, index: usize) -> bool {
 }
 
 pub fn parse_function_name(parser: &mut AstParser) -> Result<Identifier, AstParseError> {
-    Ok(parse_identifier(parser)?)
+    Ok(parse_identifier(parser, parser.get_current_index())?)
 }
 
 pub fn is_semicolon_terminator(parser: &AstParser) -> bool {
