@@ -62,7 +62,7 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{ast::{parsers::expression_statements::sequence_expression::{is_sequence_expression_statement, find}, parser::AstParser, nodes::expression_statement::{ExpressionStatement, Expression}}, tokenizer, cast_expression_statement};
+    use crate::{ast::{parsers::expression_statements::sequence_expression::{is_sequence_expression_statement, find}, parser::AstParser, nodes::expression_statement::{ExpressionStatement, Expression}, AstErrorType}, tokenizer, cast_expression_statement};
 
     #[test]
     fn string_and_string_is_valid_sequence_statement() {
@@ -100,6 +100,18 @@ mod tests {
         assert_eq!(result, true);
     }
 
+    #[test]
+    fn func_declaration_is_not_a_valid_sequence_statement() {
+        let content = String::from("function foo() {}");
+    
+        let tokens = tokenizer::parse(&content).unwrap();
+        let parser = AstParser::new(&tokens);
+    
+        let result = is_sequence_expression_statement(&parser);
+    
+        assert_eq!(result, false);
+    }
+
     // #[test]
     // fn func_and_string_is_valid_sequence() {
     //     let content = String::from("foo(x, y, z), 'bar'");
@@ -123,6 +135,18 @@ mod tests {
         let sequence = cast_expression_statement!(result, Expression::SequenceExpression).unwrap();
 
         assert_eq!(sequence.expressions.len(), 2);
+    }
+
+    #[test]
+    fn string_and_func_declaration_is_not_a_parsable_sequence_expression() {
+        let content = String::from("'foo', function bar() {};");
+    
+        let tokens = tokenizer::parse(&content).unwrap();
+        let mut parser = AstParser::new(&tokens);
+    
+        let result = find(&mut parser).unwrap_err();
+
+        assert_eq!(result.error_type, AstErrorType::UnexpectedToken);
     }
 
 }
