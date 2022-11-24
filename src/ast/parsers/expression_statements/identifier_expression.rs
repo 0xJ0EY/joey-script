@@ -1,82 +1,82 @@
-use crate::{ast::{parser::AstParser, nodes::{expression_statement::{ExpressionStatement, IdentifierExpression, Expression}, Identifier}, AstParseError, AstErrorType, parsers::{block_statements::is_closed_block_statement, util::{is_open_param_bracket, is_closed_param_bracket}}}, tokenizer::{TokenType, Separator}, ast_error};
+use crate::{ast::{parser::AstParser, nodes::expression_statement::{ExpressionStatement, IdentifierExpression, Expression}, AstParseError, AstErrorType, parsers::{util::{is_open_param_bracket, is_closed_param_bracket}, parts::identifier::parse_identifier}, SearchResult}, tokenizer::{TokenType, Separator}, ast_error};
+
+use super::FindResult;
 
 pub fn is_identifier_expression_statement(parser: &AstParser) -> bool {
-    match parser.token() {
-        Some(token) => matches!(token.token_type, TokenType::Identifier),
-        None => false,
+    // TODO: Maybe change this to only look for the most basic parts of a identifier (the first token)
+    if let Ok(response) = find(parser) {
+        return response.is_some();
     }
+
+    false
 }
 
-fn check_if_identifier_expression_has_ended(parser: &mut AstParser) -> bool {
-    let end_marker = parser.token();
+pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
+    let start_index = parser.get_current_index();
+    
+    let check_if_identifier_expression_has_ended = |parser: &AstParser, start_index: usize| -> bool {
+        let index = start_index + 1;
+        let end_marker = parser.token_at(index);
+    
+        match end_marker {
+            Some(marker) => {
+                if matches!(marker.token_type, TokenType::Separator(Separator::Terminator)) {
+                    return true;
+                }
+    
+                if matches!(marker.token_type, TokenType::Separator(Separator::Comma)) {
+                    return true;
+                }
 
-    match end_marker {
-        Some(marker) => {
-            if matches!(marker.token_type, TokenType::Separator(Separator::Terminator)) {
-                return true;
-            }
+                if is_open_param_bracket(parser, index) {
+                    return true;
+                }
 
-            if matches!(marker.token_type, TokenType::Separator(Separator::Comma)) {
-                return true;
-            }
-
-            if is_open_param_bracket(parser) {
-                return true;
-            }
-
-            if is_closed_param_bracket(parser) {
-                return true;
-            }
-
-            if is_closed_block_statement(parser) {
-                return true;
-            }
-            
-            let index = parser.get_current_index() ;
-            if index > 0 && parser.can_insert_automatic_semicolon(index) {
-                return true;
-            }
-
-            return false
-        },
-        None => return true,
-    }
-}
-
-pub fn parse_identifier_expression_statement(parser: &mut AstParser) -> Result<ExpressionStatement, AstParseError> {
-    if !is_identifier_expression_statement(parser) { return ast_error!(AstErrorType::UnexpectedToken, parser) }
-
-    let handle_identifier_token = |parser: &mut AstParser| -> Result<Identifier, AstParseError> {
-        match parser.token() {
-            Some(token) => Ok(Identifier::from(token)),
-            None => ast_error!(AstErrorType::UnexpectedToken, parser)
+                if is_closed_param_bracket(parser, index) {
+                    return true;
+                }
+                
+                if index > 0 && parser.can_insert_automatic_semicolon(index) {
+                    return true;
+                }
+    
+                return false
+            },
+            None => return true,
         }
     };
 
-    let identifier = handle_identifier_token(parser)?;
-    
-    parser.next();
+    let mut used_tokens = 0;
+    let identifier = parse_identifier(parser, start_index, &mut used_tokens)?;
 
-    if !check_if_identifier_expression_has_ended(parser) {
+    if !check_if_identifier_expression_has_ended(parser, start_index) {
         return ast_error!(AstErrorType::UnexpectedToken, parser);
     }
 
-    let start   = identifier.range.0;
-    let end     = identifier.range.1;
+    let literal_start   = identifier.range.0;
+    let literal_end     = identifier.range.1;
+
+    let ast_start       = parser.get_current_index();
+    let ast_end         = ast_start + used_tokens;
 
     let expression = IdentifierExpression { identifier };
 
-    Ok(ExpressionStatement {
+    let expression_statement = ExpressionStatement {
         expression: Expression::Identifier(expression),
-        range: (start, end)
-    })
+        range: (literal_start, literal_end)
+    };
+
+    Ok(Some(SearchResult::<ExpressionStatement> {
+        value: expression_statement,
+        ast_range: (ast_start, ast_end),
+    }))
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{tokenizer, ast::{parser::AstParser, nodes::expression_statement::Expression, parsers::expression_statements::identifier_expression::is_identifier_expression_statement, AstErrorType}};
+    use crate::{tokenizer, ast::{parser::AstParser, nodes::expression_statement::Expression, parsers::expression_statements::{identifier_expression::is_identifier_expression_statement, consume_result}, AstErrorType}};
 
-    use super::parse_identifier_expression_statement;
+    use super::find;
 
     #[test]
     fn identifier_is_identifier_statement() {
@@ -122,7 +122,7 @@ mod tests {
         let tokens = tokenizer::parse(&content).unwrap();
         let mut parser = AstParser::new(&tokens);
 
-        let result = parse_identifier_expression_statement(&mut parser).unwrap();
+        let result = find(&mut parser).unwrap().unwrap().value;
 
         if let Expression::Identifier(expression) = result.expression {
             let identifier = expression.identifier;
@@ -130,7 +130,7 @@ mod tests {
             assert_eq!(identifier.range.1, 6);
             assert_eq!(identifier.name, "foobar");
     
-            assert_eq!(parser.get_current_index(), 1);
+            assert_eq!(parser.get_current_index(), 0);
         } else {
             panic!("Invalid return value");
         }
@@ -143,7 +143,7 @@ mod tests {
         let tokens = tokenizer::parse(&content).unwrap();
         let mut parser = AstParser::new(&tokens);
 
-        let result = parse_identifier_expression_statement(&mut parser).unwrap_err();
+        let result = find(&mut parser).unwrap_err();
 
         assert_eq!(result.error_type, AstErrorType::UnexpectedToken);
     }
@@ -155,8 +155,10 @@ mod tests {
         let tokens = tokenizer::parse(&content).unwrap();
         let mut parser = AstParser::new(&tokens);
 
-        _ = parse_identifier_expression_statement(&mut parser).unwrap();
-        let result = parse_identifier_expression_statement(&mut parser).unwrap();
+        let result = find(&mut parser).unwrap().unwrap();
+        consume_result(&mut parser, result);
+
+        let result = find(&mut parser).unwrap().unwrap().value;
 
         if let Expression::Identifier(expression) = result.expression {
             let identifier = expression.identifier;
@@ -164,7 +166,7 @@ mod tests {
             assert_eq!(identifier.range.1, 3);
             assert_eq!(identifier.name, "y");
     
-            assert_eq!(parser.get_current_index(), 2);
+            assert_eq!(parser.get_current_index(), 1);
         } else {
             panic!("Invalid return value");
         }

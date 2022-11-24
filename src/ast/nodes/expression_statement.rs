@@ -30,7 +30,7 @@ pub struct ArrayExpression {
 
 #[derive(Debug)]
 pub struct SequenceExpression {
-
+    pub expressions: Vec<Expression>
 }
 
 #[derive(Debug)]

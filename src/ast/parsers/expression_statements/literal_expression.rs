@@ -1,27 +1,20 @@
-use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::{expression_statement::{ExpressionStatement, LiteralExpression, Expression}, Literal}, AstErrorType, parsers::block_statements::is_closed_block_statement, SearchResult}, ast_error};
+use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::{expression_statement::{ExpressionStatement, LiteralExpression, Expression}}, AstErrorType, parsers::{parts::literal::parse_literal}, SearchResult}, ast_error, handle_allowed_find_error};
 
 use super::FindResult;
 
 pub fn is_literal_expression_statement(parser: &AstParser) -> bool {
-    find_literal_expression_statement(parser).is_ok()
+    // TODO: Maybe change this to only look for the most basic parts of a literal (the first token)
+    if let Ok(response) = find(parser) {
+        return response.is_some();
+    }
+
+    false
 }
 
-pub fn find_literal_expression_statement(parser: &AstParser) -> FindResult<ExpressionStatement> {
-    let handle_literal_token = |parser: &AstParser| {
-        match parser.token() {
-            Some(token) => {
+pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
+    let start_index = parser.get_current_index();
 
-                if !matches!(token.token_type, TokenType::Literal(_)) {
-                    return ast_error!(AstErrorType::UnexpectedToken, parser);
-                }
-
-                Ok(Literal::from(token))
-            },
-            None => return ast_error!(AstErrorType::UnexpectedToken, parser),
-        }
-    };
-
-    let check_if_expression_has_ended = |parser: &AstParser| -> bool {
+    let check_if_expression_has_ended = |parser: &AstParser, start_index: usize| -> bool {
         let end_marker = parser.peek();
 
         match end_marker {
@@ -34,11 +27,7 @@ pub fn find_literal_expression_statement(parser: &AstParser) -> FindResult<Expre
                     return true;
                 }
     
-                if is_closed_block_statement(parser) {
-                    return true;
-                }
-    
-                let index = parser.get_current_index() + 1;
+                let index = start_index + 1;
                 if index > 0 && parser.can_insert_automatic_semicolon(index) {
                     return true;
                 }
@@ -49,17 +38,18 @@ pub fn find_literal_expression_statement(parser: &AstParser) -> FindResult<Expre
         }
     };
     
-    let token = handle_literal_token(parser)?;
+    let mut used_tokens = 0;
+    let token = handle_allowed_find_error!(parse_literal(parser, start_index, &mut used_tokens));
     
-    if !check_if_expression_has_ended(parser) {
+    if !check_if_expression_has_ended(parser, start_index) {
         return ast_error!(AstErrorType::UnexpectedToken, parser);
     }
 
     let literal_start   = token.range.0;
     let literal_end     = token.range.1;
 
-    let ast_start = parser.get_current_index();
-    let ast_end         = ast_start + 1;
+    let ast_start       = parser.get_current_index();
+    let ast_end         = ast_start + used_tokens;
 
     let expression = LiteralExpression { value: token };
 
@@ -68,73 +58,17 @@ pub fn find_literal_expression_statement(parser: &AstParser) -> FindResult<Expre
         range: (literal_start, literal_end),
     };
 
-    Ok(SearchResult::<ExpressionStatement> {
+    Ok(Some(SearchResult::<ExpressionStatement> {
         value: expression_statement,
         ast_range: (ast_start, ast_end)
-    })
-}
-
-
-fn check_if_literal_expression_has_ended(parser: &mut AstParser) -> bool {
-    let end_marker = parser.token();
-
-    match end_marker {
-        Some(marker) => {
-            if matches!(marker.token_type, TokenType::Separator(Separator::Terminator)) {
-                return true;
-            }
-
-            if matches!(marker.token_type, TokenType::Separator(Separator::Comma)) {
-                return true;
-            }
-
-            if is_closed_block_statement(parser) {
-                return true;
-            }
-
-            let index = parser.get_current_index() ;
-            if index > 0 && parser.can_insert_automatic_semicolon(index) {
-                return true;
-            }
-
-            return false
-        },
-        None => return true,
-    }
-}
-
-
-pub fn parse_literal_expression_statement(parser: &mut AstParser) -> Result<ExpressionStatement, AstParseError> {
-    let handle_literal_token = |parser: &mut AstParser| {
-        match parser.token() {
-            Some(token) => Ok(Literal::from(token)),
-            None => return Err(AstParseError { index: parser.get_current_index(), error_type: AstErrorType::UnexpectedToken }),
-        }
-    };
-
-    let literal_token = handle_literal_token(parser)?;
-    parser.next();
-
-    if !check_if_literal_expression_has_ended(parser) {
-        return ast_error!(AstErrorType::UnexpectedToken, parser);
-    }
-
-    let start   = literal_token.range.0;
-    let end     = literal_token.range.1;
-
-    let expression = LiteralExpression { value: literal_token };
-
-    Ok(ExpressionStatement {
-        expression: Expression::Literal(expression),
-        range: (start, end),
-    })
+    }))
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{tokenizer, ast::{parser::AstParser, nodes::expression_statement::Expression, parsers::expression_statements::literal_expression::{is_literal_expression_statement, find_literal_expression_statement}}};
+    use crate::{tokenizer, ast::{parser::AstParser, nodes::expression_statement::Expression, parsers::expression_statements::{literal_expression::is_literal_expression_statement, consume_result}}};
 
-    use super::parse_literal_expression_statement;
+    use super::find;
 
     #[test]
     fn string_is_literal_expression_statement() {
@@ -203,7 +137,7 @@ mod tests {
         let tokens = tokenizer::parse(&content).unwrap();
         let mut parser = AstParser::new(&tokens);
 
-        let result = parse_literal_expression_statement(&mut parser).unwrap();
+        let result = find(&mut parser).unwrap().unwrap().value;
 
         if let Expression::Literal(expression) = result.expression {
             let literal = expression.value;
@@ -211,7 +145,7 @@ mod tests {
             assert_eq!(literal.range.1, 8);
             assert_eq!(literal.value, "Foobar");
     
-            assert_eq!(parser.get_current_index(), 1);
+            assert_eq!(parser.get_current_index(), 0);
         } else {
             panic!("Invalid return value");
         }
@@ -224,8 +158,35 @@ mod tests {
         let tokens = tokenizer::parse(&content).unwrap();
         let mut parser = AstParser::new(&tokens);
 
-        _ = parse_literal_expression_statement(&mut parser).unwrap();
-        let result = parse_literal_expression_statement(&mut parser).unwrap();
+        let result = find(&mut parser).unwrap().unwrap();
+        consume_result(&mut parser, result);
+
+        let result = find(&mut parser).unwrap().unwrap().value;
+
+        if let Expression::Literal(expression) = result.expression {
+            let literal = expression.value;
+            assert_eq!(literal.range.0, 9);
+            assert_eq!(literal.range.1, 14);
+            assert_eq!(literal.value, "Bar");
+    
+            assert_eq!(parser.get_current_index(), 1);
+        } else {
+            panic!("Invalid return value");
+        }
+    }
+
+    #[test]
+    fn both_strings_are_parsable_literal_expression() {
+        let content = String::from("'Foobar';'Bar';");
+
+        let tokens = tokenizer::parse(&content).unwrap();
+        let mut parser = AstParser::new(&tokens);
+
+        let result = find(&mut parser).unwrap().unwrap();
+        consume_result(&mut parser, result);
+        parser.next(); // Skip the ;
+
+        let result = find(&mut parser).unwrap().unwrap().value;
 
         if let Expression::Literal(expression) = result.expression {
             let literal = expression.value;
@@ -240,43 +201,23 @@ mod tests {
     }
 
     #[test]
-    fn both_strings_are_parsable_literal_expression() {
-        let content = String::from("'Foobar';'Bar';");
-
-        let tokens = tokenizer::parse(&content).unwrap();
-        let mut parser = AstParser::new(&tokens);
-
-        _ = parse_literal_expression_statement(&mut parser).unwrap();
-        parser.next(); // Skip the ;
-
-        let result = parse_literal_expression_statement(&mut parser).unwrap();
-
-        if let Expression::Literal(expression) = result.expression {
-            let literal = expression.value;
-            assert_eq!(literal.range.0, 9);
-            assert_eq!(literal.range.1, 14);
-            assert_eq!(literal.value, "Bar");
-    
-            assert_eq!(parser.get_current_index(), 3);
-        } else {
-            panic!("Invalid return value");
-        }
-    }
-
-    #[test]
     fn three_strings_are_parsable_literal_expression() {
         let content = String::from("'Foobar';'Bar';'Foo';");
 
         let tokens = tokenizer::parse(&content).unwrap();
         let mut parser = AstParser::new(&tokens);
 
-        _ = parse_literal_expression_statement(&mut parser).unwrap();
+        let result = find(&mut parser).unwrap().unwrap();
+        consume_result(&mut parser, result);
+
         parser.next(); // Skip the ;
 
-        _ = parse_literal_expression_statement(&mut parser).unwrap();
+        let result = find(&mut parser).unwrap().unwrap();
+        consume_result(&mut parser, result);
+
         parser.next(); // Skip the ;
 
-        let result = parse_literal_expression_statement(&mut parser).unwrap();
+        let result = find(&mut parser).unwrap().unwrap().value;
 
         if let Expression::Literal(expression) = result.expression {
             let literal = expression.value;
@@ -284,7 +225,7 @@ mod tests {
             assert_eq!(literal.range.1, 20);
             assert_eq!(literal.value, "Foo");
     
-            assert_eq!(parser.get_current_index(), 5);
+            assert_eq!(parser.get_current_index(), 4);
         } else {
             panic!("Invalid return value");
         }

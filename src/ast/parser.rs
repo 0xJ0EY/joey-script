@@ -24,32 +24,24 @@ impl<'a> AstParser<'a> {
         self.tokens.get(self.index)
     }
 
-    pub fn peek(&self) -> Option<&Token> {
-        self.tokens.get(self.index + 1)
+    pub fn token_at(&self, index: usize) -> Option<&Token> {
+        self.tokens.get(index)
     }
 
-    pub fn peek_forward(&self, distance: usize) -> Option<&Token> {
-        self.tokens.get(self.index + distance)
+    pub fn peek(&self) -> Option<&Token> {
+        self.tokens.get(self.index + 1)
     }
 
     pub fn peek_back(&self) -> Option<&Token> {
         self.tokens.get(self.index - 1)
     }
 
-    pub fn walk_back(&mut self) {
-        self.index -= 1;
-    }
-
     pub fn get_current_index(&self) -> usize {
         return self.index;
     }
 
-    pub fn consume(&mut self) -> Option<&Token> {
-        let value = self.tokens.get(self.index);
-
-        self.index += 1;
-
-        return value;
+    pub fn consume_range(&mut self, range: usize) {
+        self.index += range;
     }
 
     pub fn next(&mut self) {
