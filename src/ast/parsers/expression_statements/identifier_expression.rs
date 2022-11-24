@@ -15,7 +15,8 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
     let start_index = parser.get_current_index();
     
     let check_if_identifier_expression_has_ended = |parser: &AstParser, start_index: usize| -> bool {
-        let end_marker = parser.peek();
+        let index = start_index + 1;
+        let end_marker = parser.token_at(index);
     
         match end_marker {
             Some(marker) => {
@@ -26,8 +27,6 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
                 if matches!(marker.token_type, TokenType::Separator(Separator::Comma)) {
                     return true;
                 }
-
-                let index = start_index + 1;
 
                 if is_open_param_bracket(parser, index) {
                     return true;

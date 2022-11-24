@@ -9,12 +9,6 @@ pub mod sequence_expression;
 
 type FindResult<T> = Result<Option<SearchResult<T>>, AstParseError>;
 
-pub fn is_single_expression_statement(parser: &AstParser) -> bool {
-    is_literal_expression_statement(parser) ||
-    is_identifier_expression_statement(parser) ||
-    is_call_expression_statement(parser)
-}
-
 pub fn is_expression_statement(parser: &AstParser) -> bool {
     is_sequence_expression_statement(parser) ||
     is_literal_expression_statement(parser) ||
@@ -41,6 +35,10 @@ pub fn parse_expression_statement(parser: &mut AstParser) -> Result<ExpressionSt
     }
 
     if let Some(result) = identifier_expression::find(parser)? {
+        return Ok(consume_result(parser, result));
+    }
+
+    if let Some(result) = sequence_expression::find(parser)? {
         return Ok(consume_result(parser, result));
     }
 
