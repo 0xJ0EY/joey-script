@@ -7,7 +7,7 @@ pub fn parse_literal(parser: &AstParser, index: usize, used_tokens: &mut usize) 
                 return ast_error!(AstErrorType::UnexpectedToken, parser);
             }
 
-            *used_tokens = 1;
+            *used_tokens += 1;
 
             Ok(Literal::from(token))
         },

@@ -7,7 +7,7 @@ pub fn parse_identifier(parser: &AstParser, index: usize, used_tokens: &mut usiz
                 return ast_error!(AstErrorType::UnexpectedToken, parser);
             }
 
-            *used_tokens = 1;
+            *used_tokens += 1;
 
             Ok(Identifier::from(token))
         },
