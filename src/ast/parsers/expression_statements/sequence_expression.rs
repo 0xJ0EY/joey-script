@@ -1,4 +1,4 @@
-use crate::{ast::{parser::AstParser, nodes::expression_statement::{SequenceExpression, self, ExpressionStatement, Expression}, parsers::parts::sequence::parse_sequence, AstErrorType, AstParseError, SearchResult}, tokenizer::{TokenType, Separator}, ast_error};
+use crate::{ast::{parser::AstParser, nodes::expression_statement::{SequenceExpression, ExpressionStatement, Expression}, parsers::parts::sequence::parse_sequence, AstErrorType, AstParseError, SearchResult}, tokenizer::{TokenType, Separator}, ast_error};
 
 use super::FindResult;
 
@@ -62,7 +62,7 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{ast::{parsers::expression_statements::sequence_expression::{is_sequence_expression_statement, find}, parser::AstParser, nodes::expression_statement::{ExpressionStatement, Expression}, AstErrorType}, tokenizer, cast_expression_statement};
+    use crate::{ast::{parsers::expression_statements::sequence_expression::{is_sequence_expression_statement, find}, parser::AstParser, nodes::expression_statement::Expression, AstErrorType}, tokenizer, cast_expression_statement};
 
     #[test]
     fn string_and_string_is_valid_sequence_statement() {

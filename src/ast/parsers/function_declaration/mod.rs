@@ -1,4 +1,4 @@
-use crate::{ast::{AstParseError, parser::AstParser, nodes::{function_declaration::FunctionDeclaration, expression_statement::Expression, Identifier, block_statement::BlockStatement}, AstErrorType, parsers::{block_statements::parse_block_statement, util::{is_closed_param_bracket, is_param_separator}, parts::identifier::parse_identifier}}, tokenizer::{TokenType, Separator}, ast_error};
+use crate::{ast::{AstParseError, parser::AstParser, nodes::{function_declaration::FunctionDeclaration, Identifier, block_statement::BlockStatement}, AstErrorType, parsers::{block_statements::parse_block_statement, util::{is_closed_param_bracket, is_param_separator}, parts::identifier::parse_identifier}}, tokenizer::{TokenType}, ast_error};
 
 use super::{get_start_position, get_end_position_of_previous_token, util::{parse_function_name, is_open_param_bracket}};
 
@@ -39,8 +39,8 @@ pub fn parse_function_declaration(parser: &mut AstParser) -> Result<FunctionDecl
 
         loop {
             // Validate if we got an identifier expression
-            let identifier = parse_identifier(parser, parser.get_current_index(), &mut 0)?;
-            params.push(identifier);
+            let identifier_expression = parse_identifier(parser, parser.get_current_index(), &mut 0)?;
+            params.push(identifier_expression.identifier);
 
             parser.next();
 

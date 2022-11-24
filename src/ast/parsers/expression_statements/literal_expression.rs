@@ -1,4 +1,4 @@
-use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::{expression_statement::{ExpressionStatement, LiteralExpression, Expression}}, AstErrorType, parsers::{parts::literal::parse_literal}, SearchResult}, ast_error, handle_allowed_find_error};
+use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::expression_statement::{ExpressionStatement, Expression}, AstErrorType, parsers::{parts::literal::parse_literal}, SearchResult}, ast_error, handle_allowed_find_error};
 
 use super::FindResult;
 
@@ -39,22 +39,21 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
     };
     
     let mut used_tokens = 0;
-    let token = handle_allowed_find_error!(parse_literal(parser, start_index, &mut used_tokens));
+    let literal_expression = handle_allowed_find_error!(parse_literal(parser, start_index, &mut used_tokens));
+    let literal = &literal_expression.value;
     
     if !check_if_expression_has_ended(parser, start_index) {
         return ast_error!(AstErrorType::UnexpectedToken, parser);
     }
 
-    let literal_start   = token.range.0;
-    let literal_end     = token.range.1;
+    let literal_start   = literal.range.0;
+    let literal_end     = literal.range.1;
 
     let ast_start       = parser.get_current_index();
     let ast_end         = ast_start + used_tokens;
 
-    let expression = LiteralExpression { value: token };
-
     let expression_statement = ExpressionStatement {
-        expression: Expression::Literal(expression),
+        expression: Expression::Literal(literal_expression),
         range: (literal_start, literal_end),
     };
 

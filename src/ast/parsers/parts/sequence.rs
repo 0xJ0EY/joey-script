@@ -1,5 +1,5 @@
 
-use crate::{ast::{parser::AstParser, nodes::expression_statement::{Expression, LiteralExpression, IdentifierExpression}, AstParseError, AstErrorType}, ast_error, tokenizer::{TokenType, Separator}};
+use crate::{ast::{parser::AstParser, nodes::expression_statement::{Expression}, AstParseError, AstErrorType}, ast_error, tokenizer::{TokenType, Separator}};
 
 use super::{literal::parse_literal, identifier::parse_identifier};
 
@@ -7,13 +7,11 @@ fn parse_sequence_token(parser: &AstParser, index: usize, tokens_used: &mut usiz
     // TODO: Add the other expressions when implemented
 
     if let Ok(result) = parse_literal(parser, index, tokens_used) {
-        let literal_expression = LiteralExpression { value: result };
-        return Ok(Expression::Literal(literal_expression));
+        return Ok(Expression::Literal(result));
     }
 
     if let Ok(result) = parse_identifier(parser, index, tokens_used) {
-        let identifier_expression = IdentifierExpression { identifier: result };
-        return Ok(Expression::Identifier(identifier_expression));
+        return Ok(Expression::Identifier(result));
     }
 
     ast_error!(AstErrorType::UnexpectedToken, parser)
