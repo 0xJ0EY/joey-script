@@ -1,6 +1,10 @@
 
-use crate::{ast::{parser::AstParser, nodes::Literal, AstParseError, AstErrorType}, ast_error, tokenizer::TokenType};
+use crate::{ast::{parser::AstParser, nodes::expression_statement::Expression, AstParseError}};
 
-pub fn parse_sequence(parser: &AstParser, index: usize, tokens_used: &mut usize) -> Result<Literal, AstParseError> {
+fn parse_sequence_token(parser: &AstParser, index: usize) -> Option<Expression> {
+    todo!()
+}
+
+pub fn parse_sequence(parser: &AstParser, index: usize, tokens_used: &mut usize) -> Result<Vec<Expression>, AstParseError> {
     todo!()
 }

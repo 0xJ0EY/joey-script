@@ -39,7 +39,7 @@ pub fn parse_function_declaration(parser: &mut AstParser) -> Result<FunctionDecl
 
         loop {
             // Validate if we got an identifier expression
-            let identifier = parse_identifier(parser, parser.get_current_index())?;
+            let identifier = parse_identifier(parser, parser.get_current_index(), &mut 0)?;
             params.push(identifier);
 
             parser.next();

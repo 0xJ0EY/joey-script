@@ -47,7 +47,8 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
         }
     };
 
-    let identifier = parse_identifier(parser, start_index)?;
+    let mut used_tokens = 0;
+    let identifier = parse_identifier(parser, start_index, &mut used_tokens)?;
 
     if !check_if_identifier_expression_has_ended(parser, start_index) {
         return ast_error!(AstErrorType::UnexpectedToken, parser);
@@ -57,7 +58,7 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
     let literal_end     = identifier.range.1;
 
     let ast_start       = parser.get_current_index();
-    let ast_end         = ast_start + 1;
+    let ast_end         = ast_start + used_tokens;
 
     let expression = IdentifierExpression { identifier };
 
