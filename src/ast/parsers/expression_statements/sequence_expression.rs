@@ -47,10 +47,8 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
     let ast_start = start_index;
     let ast_end = ast_start + used_tokens;
 
-    let expression = SequenceExpression { expressions: sequence };
-
     let expression_statement = ExpressionStatement {
-        expression: Expression::SequenceExpression(expression),
+        expression: Expression::SequenceExpression(sequence),
         range: (literal_start, literal_end),
     };
 

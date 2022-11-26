@@ -43,7 +43,7 @@ pub fn parse_function_call(parser: &AstParser, index: usize, tokens_used: &mut u
     let arguments;
 
     if !is_end_parenthesis(parser, index + tokens) {
-        arguments = parse_sequence(parser, index + tokens, &mut tokens)?;
+        arguments = parse_sequence(parser, index + tokens, &mut tokens)?.expressions;
 
         if !is_end_parenthesis(parser, index + tokens) {
             return ast_error!(AstErrorType::UnexpectedToken, parser);

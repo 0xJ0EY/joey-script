@@ -1,5 +1,5 @@
 
-use crate::{ast::{parser::AstParser, nodes::expression_statement::{Expression}, AstParseError, AstErrorType}, ast_error, tokenizer::{TokenType, Separator}};
+use crate::{ast::{parser::AstParser, nodes::expression_statement::{Expression, SequenceExpression}, AstParseError, AstErrorType}, ast_error, tokenizer::{TokenType, Separator}};
 
 use super::{literal::parse_literal, identifier::parse_identifier, function_call::parse_function_call};
 
@@ -58,7 +58,7 @@ fn parse_separator(parser: &AstParser, index: usize, tokens_used: &mut usize) ->
     }
 }
 
-pub fn parse_sequence(parser: &AstParser, index: usize, tokens_used: &mut usize) -> Result<Vec<Expression>, AstParseError> {
+pub fn parse_sequence(parser: &AstParser, index: usize, tokens_used: &mut usize) -> Result<SequenceExpression, AstParseError> {
     let mut tokens = 0;
     let mut expressions = Vec::new();
 
@@ -72,12 +72,14 @@ pub fn parse_sequence(parser: &AstParser, index: usize, tokens_used: &mut usize)
 
     *tokens_used += tokens;
 
-    Ok(expressions)
+    let expression = SequenceExpression { expressions };
+
+    Ok(expression)
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{tokenizer, ast::{parser::AstParser, parsers::parts::sequence::parse_sequence, nodes::expression_statement::Expression}};
+    use crate::{tokenizer, ast::{parser::AstParser, parsers::parts::sequence::parse_sequence, nodes::expression_statement::Expression}, cast_expression};
 
     #[test]
     fn sequence_can_be_parsed_as_a_sequence() {
@@ -90,17 +92,17 @@ mod tests {
 
         let result = parse_sequence(&parser, 0, &mut tokens_used).unwrap();
 
-        let result1 = match result.get(0).unwrap() {
+        let result1 = match result.expressions.get(0).unwrap() {
            Expression::Literal(val) => Some(&val.value),
             _ => None
         };
 
-        let result2 =  match result.get(1).unwrap() {
+        let result2 =  match result.expressions.get(1).unwrap() {
             Expression::Identifier(val) => Some(&val.identifier),
              _ => None
         };
 
-        assert_eq!(result.len(), 2);
+        assert_eq!(result.expressions.len(), 2);
         assert_eq!(tokens_used, 3);
         assert_eq!(result1.unwrap().value, "Foobar");
         assert_eq!(result2.unwrap().name, "Bar");
