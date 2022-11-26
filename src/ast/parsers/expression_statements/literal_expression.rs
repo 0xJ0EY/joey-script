@@ -1,6 +1,6 @@
 use crate::{tokenizer::{TokenType, Separator}, ast::{parser::AstParser, AstParseError, nodes::expression_statement::{ExpressionStatement, Expression}, AstErrorType, parsers::{parts::literal::parse_literal}, SearchResult}, ast_error, handle_allowed_find_error};
 
-use super::FindResult;
+use super::{FindResult, expression_has_ended};
 
 pub fn is_literal_expression_statement(parser: &AstParser) -> bool {
     // TODO: Maybe change this to only look for the most basic parts of a literal (the first token)
@@ -13,36 +13,12 @@ pub fn is_literal_expression_statement(parser: &AstParser) -> bool {
 
 pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
     let start_index = parser.get_current_index();
-
-    let check_if_expression_has_ended = |parser: &AstParser, start_index: usize| -> bool {
-        let end_marker = parser.peek();
-
-        match end_marker {
-            Some(marker) => {
-                if matches!(marker.token_type, TokenType::Separator(Separator::Terminator)) {
-                    return true;
-                }
-    
-                if matches!(marker.token_type, TokenType::Separator(Separator::Comma)) {
-                    return true;
-                }
-    
-                let index = start_index + 1;
-                if index > 0 && parser.can_insert_automatic_semicolon(index) {
-                    return true;
-                }
-    
-                return false
-            },
-            None => return true,
-        }
-    };
     
     let mut used_tokens = 0;
     let literal_expression = handle_allowed_find_error!(parse_literal(parser, start_index, &mut used_tokens));
     let literal = &literal_expression.value;
     
-    if !check_if_expression_has_ended(parser, start_index) {
+    if !expression_has_ended(parser, start_index) {
         return ast_error!(AstErrorType::UnexpectedToken, parser);
     }
 

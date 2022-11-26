@@ -1,6 +1,6 @@
-use crate::{ast::{parser::AstParser, AstParseError, nodes::expression_statement::ExpressionStatement, AstErrorType, SearchResult}, ast_error};
+use crate::{ast::{parser::AstParser, AstParseError, nodes::expression_statement::ExpressionStatement, AstErrorType, SearchResult}, ast_error, tokenizer::{TokenType, Separator}};
 
-use self::{literal_expression::{is_literal_expression_statement}, identifier_expression::is_identifier_expression_statement, call_expression::{is_call_expression_statement, parse_call_expression_statement}, sequence_expression::is_sequence_expression_statement};
+use self::{literal_expression::{is_literal_expression_statement}, identifier_expression::is_identifier_expression_statement, call_expression::{is_call_expression_statement}, sequence_expression::is_sequence_expression_statement};
 
 pub mod identifier_expression;
 pub mod literal_expression;
@@ -25,9 +25,8 @@ pub fn consume_result(parser: &mut AstParser, result: SearchResult<ExpressionSta
 }
 
 pub fn parse_expression_statement(parser: &mut AstParser) -> Result<ExpressionStatement, AstParseError> {
-    
-    if is_call_expression_statement(parser) {
-        return parse_call_expression_statement(parser);
+    if let Some(result) = call_expression::find(parser)? {
+        return Ok(consume_result(parser, result));
     }
 
     if let Some(result) = literal_expression::find(parser)? {
@@ -43,4 +42,29 @@ pub fn parse_expression_statement(parser: &mut AstParser) -> Result<ExpressionSt
     }
 
     return ast_error!(AstErrorType::UnexpectedToken, parser);
+}
+
+fn expression_has_ended(parser: &AstParser, start_index: usize) -> bool {
+
+    let index = start_index + 1;
+    let end_marker = parser.token_at(index);
+
+    match end_marker {
+        Some(marker) => {
+            if matches!(marker.token_type, TokenType::Separator(Separator::Terminator)) {
+                return true;
+            }
+
+            if matches!(marker.token_type, TokenType::Separator(Separator::Comma)) {
+                return true;
+            }
+
+            if index > 0 && parser.can_insert_automatic_semicolon(index) {
+                return true;
+            }
+
+            return false
+        },
+        None => return true,
+    }
 }

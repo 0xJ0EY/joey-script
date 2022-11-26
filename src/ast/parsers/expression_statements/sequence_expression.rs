@@ -62,7 +62,7 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{ast::{parsers::expression_statements::sequence_expression::{is_sequence_expression_statement, find}, parser::AstParser, nodes::expression_statement::Expression, AstErrorType}, tokenizer, cast_expression_statement};
+    use crate::{ast::{parsers::expression_statements::sequence_expression::{is_sequence_expression_statement, find}, parser::AstParser, nodes::expression_statement::{Expression}, AstErrorType}, tokenizer, cast_expression_statement};
 
     #[test]
     fn string_and_string_is_valid_sequence_statement() {

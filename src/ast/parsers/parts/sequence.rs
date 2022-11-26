@@ -21,14 +21,10 @@ fn is_end_marker(parser: &AstParser, index: usize, tokens_used: &mut usize) -> b
     match parser.token_at(index) {
         Some(token) => {
             if matches!(token.token_type, TokenType::Separator(Separator::CurlyBrace)) {
-                *tokens_used += 1;
-
                 return token.value == "}";
             }
 
             if matches!(token.token_type, TokenType::Separator(Separator::Parenthesis)) {
-                *tokens_used += 1;
-
                 return token.value == ")";
             }
 
@@ -78,7 +74,7 @@ pub fn parse_sequence(parser: &AstParser, index: usize, tokens_used: &mut usize)
 
 #[cfg(test)]
 mod tests {
-    use crate::{tokenizer, ast::{parser::AstParser, parsers::{parts::sequence::parse_sequence}, nodes::expression_statement::Expression}};
+    use crate::{tokenizer, ast::{parser::AstParser, parsers::parts::sequence::parse_sequence, nodes::expression_statement::Expression}};
 
     #[test]
     fn sequence_can_be_parsed_as_a_sequence() {

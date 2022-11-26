@@ -39,6 +39,19 @@ fn get_end_position_of_previous_token(parser: &AstParser) -> Result<usize, AstPa
 }
 
 #[macro_export]
+macro_rules! cast_expression {
+    ($target: expr, $pat: path) => {
+        {
+            if let $pat(a) = $target {
+                Some(a)
+            } else {
+                None
+            }
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! cast_expression_statement {
     ($target: expr, $pat: path) => {
         {

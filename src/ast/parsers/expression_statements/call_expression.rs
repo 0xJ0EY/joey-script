@@ -1,45 +1,43 @@
-use crate::{ast::{parser::AstParser, nodes::{expression_statement::{ExpressionStatement, Expression, CallExpression}, Identifier}, AstParseError, AstErrorType, parsers::{function_declaration::parse_function_declaration, util::{parse_function_name}, expression_statements::parse_expression_statement}}, tokenizer::TokenType, ast_error};
+use crate::{ast::{parser::AstParser, nodes::{expression_statement::{ExpressionStatement, Expression, CallExpression, SequenceExpression, self}, Identifier}, AstParseError, AstErrorType, parsers::{function_declaration::parse_function_declaration, util::{parse_function_name}, expression_statements::parse_expression_statement, parts::function_call::parse_function_call}, SearchResult}, tokenizer::TokenType, ast_error, handle_allowed_find_error};
 
-use super::FindResult;
+use super::{FindResult, expression_has_ended};
 
 pub fn is_call_expression_statement(parser: &AstParser) -> bool {
-    match parser.token() {
-        Some(token) => matches!(token.token_type, TokenType::Identifier),
-        None => false,
+    if let Ok(response) = find(parser) {
+        return response.is_some()
     }
+
+    false
 }
 
 pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
+    let start_index = parser.get_current_index();
+    let mut used_tokens = 0;
 
-    
+    let call_expression = handle_allowed_find_error!(parse_function_call(parser, start_index, &mut used_tokens));
+    let call = &call_expression.callee;
 
-    todo!()
-}
+    if !expression_has_ended(parser, start_index + used_tokens) {
+        return ast_error!(AstErrorType::UnexpectedToken, parser);
+    }
 
-pub fn parse_call_expression_statement(parser: &mut AstParser) -> Result<ExpressionStatement, AstParseError> {
+    used_tokens += 1;
 
-    /*
-    let parse_identifier = |parser: &mut AstParser| -> Result<Identifier, AstParseError> {
-        let expression = parse_identifier_expression_statement(parser)?;
+    // TODO: Implement correct function distance
+    let literal_start = call.range.0;
+    let literal_end =  call.range.1;
 
-        match expression.expression {
-            Expression::Identifier(id) => Ok(id.identifier),
-            _ => return ast_error!(AstErrorType::UnexpectedToken, parser)
-        }
+    let ast_start = start_index;
+    let ast_end = ast_start + used_tokens;
+
+    let expression_statement = ExpressionStatement {
+        expression: Expression::CallExpression(call_expression),
+        range: (literal_start, literal_end)
     };
 
-    let parse_parameters = |parser: &mut AstParser| -> Result<Vec<Expression>, AstParseError> {
-        
-        parse_expression_statement(parser);
-        
-        todo!();
-    };
-
-    let identifier = parse_function_name(parser)?;
-    let params = parse_parameters(parser)?;
-
-    // let params = parse_parameters(parser);
-    */
-
-    todo!()
+    Ok(Some(SearchResult::<ExpressionStatement> {
+        value: expression_statement,
+        ast_range: (ast_start, ast_end),
+    }))
 }
+
