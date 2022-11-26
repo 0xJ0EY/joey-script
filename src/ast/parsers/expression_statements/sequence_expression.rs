@@ -40,7 +40,7 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
     // Add end marker
     used_tokens += 1;
 
-    // TOD: Implement correct literal distance
+    // TODO: Implement correct literal distance
     let literal_start = 0;
     let literal_end = 0;
 
@@ -112,17 +112,17 @@ mod tests {
         assert_eq!(result, false);
     }
 
-    // #[test]
-    // fn func_and_string_is_valid_sequence() {
-    //     let content = String::from("foo(x, y, z), 'bar'");
+    #[test]
+    fn func_and_string_is_valid_sequence() {
+        let content = String::from("foo(x, y, z), 'bar'");
     
-    //     let tokens = tokenizer::parse(&content).unwrap();
-    //     let parser = AstParser::new(&tokens);
+        let tokens = tokenizer::parse(&content).unwrap();
+        let parser = AstParser::new(&tokens);
     
-    //     let result = is_sequence_expression_statement(&parser);
+        let result = is_sequence_expression_statement(&parser);
     
-    //     assert_eq!(result, true);
-    // }
+        assert_eq!(result, true);
+    }
 
     #[test]
     fn string_and_identifier_is_parsable_sequence_expression() {

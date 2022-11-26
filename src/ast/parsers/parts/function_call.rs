@@ -1,4 +1,4 @@
-use crate::{ast::{AstParseError, parser::AstParser, nodes::expression_statement::{CallExpression, Expression}, parsers::{util::parse_function_name, parts::sequence::parse_sequence}, AstErrorType}, ast_error, tokenizer::{TokenType, Separator}};
+use crate::{ast::{AstParseError, parser::AstParser, nodes::expression_statement::CallExpression, parsers::{parts::sequence::parse_sequence}, AstErrorType}, ast_error, tokenizer::{TokenType, Separator}};
 
 use super::identifier::parse_identifier;
 
@@ -67,7 +67,7 @@ pub fn parse_function_call(parser: &AstParser, index: usize, tokens_used: &mut u
 
 #[cfg(test)]
 mod tests {
-    use crate::{tokenizer, ast::{parser::AstParser, nodes::expression_statement::Expression}, cast_expression};
+    use crate::{tokenizer, ast::{parser::AstParser}};
 
     use super::parse_function_call;
 

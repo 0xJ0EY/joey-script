@@ -1,10 +1,13 @@
 
 use crate::{ast::{parser::AstParser, nodes::expression_statement::{Expression}, AstParseError, AstErrorType}, ast_error, tokenizer::{TokenType, Separator}};
 
-use super::{literal::parse_literal, identifier::parse_identifier};
+use super::{literal::parse_literal, identifier::parse_identifier, function_call::parse_function_call};
 
 fn parse_sequence_token(parser: &AstParser, index: usize, tokens_used: &mut usize) -> Result<Expression, AstParseError> {
     // TODO: Add the other expressions when implemented
+    if let Ok(result) = parse_function_call(parser, index, tokens_used) {
+        return Ok(Expression::CallExpression(result));
+    }
 
     if let Ok(result) = parse_literal(parser, index, tokens_used) {
         return Ok(Expression::Literal(result));
