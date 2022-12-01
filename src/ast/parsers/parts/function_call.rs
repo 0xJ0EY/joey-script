@@ -31,11 +31,14 @@ fn is_end_parenthesis(parser: &AstParser, index: usize) -> bool {
 pub fn parse_function_call(parser: &AstParser, index: usize, tokens_used: &mut usize) -> Result<CallExpression, AstParseError> {
     let mut tokens = 0;
 
-    let function_name = parse_identifier(parser, index + tokens, &mut tokens)?;
+    let function_name = match parse_identifier(parser, index + tokens, &mut tokens) {
+        Ok(value) => value,
+        Err(_) => return  ast_error!(AstErrorType::UnexpectedTokenStart, parser),
+    };
 
     // Check for start param
     if !is_start_parenthesis(parser, index + tokens) {
-        return ast_error!(AstErrorType::UnexpectedToken, parser);
+        return ast_error!(AstErrorType::UnexpectedTokenStart, parser);
     } else {
         tokens += 1;
     }
