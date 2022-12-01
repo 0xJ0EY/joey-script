@@ -35,7 +35,7 @@ pub fn parse_function_call(parser: &AstParser, index: usize, tokens_used: &mut u
 
     // Check for start param
     if !is_start_parenthesis(parser, index + tokens) {
-        return ast_error!(AstErrorType::UnexpectedToken, parser);
+        return ast_error!(AstErrorType::UnexpectedTokenStart, parser);
     } else {
         tokens += 1;
     }

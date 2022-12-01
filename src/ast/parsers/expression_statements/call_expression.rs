@@ -14,7 +14,14 @@ pub fn find(parser: &AstParser) -> FindResult<ExpressionStatement> {
     let start_index = parser.get_current_index();
     let mut used_tokens = 0;
 
-    let call_expression = handle_allowed_find_error!(parse_function_call(parser, start_index, &mut used_tokens));
+    let call_expression = match parse_function_call(parser, start_index, &mut used_tokens) {
+        Ok(exp) => exp,
+        Err(err) => match err.error_type {
+            AstErrorType::UnexpectedTokenStart => return Ok(None),
+            _ => return Err(err)
+        },
+    };
+
     let call = &call_expression.callee;
 
     if !expression_has_ended(parser, start_index + used_tokens) {
@@ -127,14 +134,14 @@ mod tests {
 
     #[test]
     fn half_function_call_is_not_a_parsable_call_expression() {
-        let content = String::from("call(");
+        let content = String::from("call(123");
 
         let tokens = tokenizer::parse(&content).unwrap();
         let mut parser = AstParser::new(&tokens);
 
-        let result = find(&mut parser).unwrap();
+        let result = find(&mut parser).unwrap_err();
 
-        assert_eq!(result.is_none(), true);
+        // assert_eq!(result.is_none(), true);
     }
 
 }
