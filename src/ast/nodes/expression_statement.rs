@@ -8,8 +8,8 @@ pub struct LiteralExpression {
 #[derive(Debug)]
 pub struct BinaryExpression {
     pub operator: String,
-    pub left: Literal,
-    pub right: Literal,
+    pub left: Box<Expression>,
+    pub right: Box<Expression>,
 }
 
 #[derive(Debug)]
@@ -47,6 +47,8 @@ pub enum Expression {
     ObjectExpression(ObjectExpression),
     SequenceExpression(SequenceExpression),
     ArrayExpression(ArrayExpression),
+    // MemberExpression(MemberExpression)
+    // UpdateExpression(UpdateExpression),
 }
 
 #[derive(Debug)]
