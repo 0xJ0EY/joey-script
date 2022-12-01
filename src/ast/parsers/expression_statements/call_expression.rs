@@ -1,4 +1,4 @@
-use crate::{ast::{parser::AstParser, nodes::{expression_statement::{ExpressionStatement, Expression}}, AstParseError, AstErrorType, parsers::{parts::function_call::parse_function_call}, SearchResult}, ast_error, handle_allowed_find_error};
+use crate::{ast::{parser::AstParser, nodes::{expression_statement::{ExpressionStatement, Expression}}, AstParseError, AstErrorType, parsers::{parts::function_call::parse_function_call}, SearchResult}, ast_error};
 
 use super::{FindResult, expression_has_ended};
 
@@ -141,7 +141,7 @@ mod tests {
 
         let result = find(&mut parser).unwrap_err();
 
-        // assert_eq!(result.is_none(), true);
+        assert_eq!(result.error_type, AstErrorType::UnexpectedToken);
     }
 
 }
