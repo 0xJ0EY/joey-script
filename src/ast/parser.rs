@@ -1,6 +1,6 @@
 use crate::tokenizer::{Token, TokenType, Separator};
 
-use super::{AstParseError, Program, AstErrorType, nodes::{AstNode}, parsers::{expression_statements::{parse_expression_statement, is_expression_statement}, block_statements::{is_closed_block_statement, is_open_block_statement, parse_block_statement}, function_declaration::{is_function_declaration, parse_function_declaration}, util::is_semicolon_terminator}};
+use super::{AstParseError, Program, AstErrorType, nodes::AstNode, parsers::{expression_statements::{parse_expression_statement, is_expression_statement}, block_statements::{is_closed_block_statement, is_open_block_statement, parse_block_statement}, function_declaration::{is_function_declaration, parse_function_declaration}, util::is_semicolon_terminator}};
 
 #[derive(Debug)]
 pub struct AstParser<'a> {
@@ -26,10 +26,6 @@ impl<'a> AstParser<'a> {
 
     pub fn token_at(&self, index: usize) -> Option<&Token> {
         self.tokens.get(index)
-    }
-
-    pub fn peek(&self) -> Option<&Token> {
-        self.tokens.get(self.index + 1)
     }
 
     pub fn peek_back(&self) -> Option<&Token> {
