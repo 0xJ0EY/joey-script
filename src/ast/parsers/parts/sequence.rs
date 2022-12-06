@@ -1,24 +1,7 @@
 
-use crate::{ast::{parser::AstParser, nodes::expression_statement::{Expression, SequenceExpression}, AstParseError, AstErrorType}, ast_error, tokenizer::{TokenType, Separator}};
+use crate::{ast::{parser::AstParser, nodes::expression_statement::SequenceExpression, AstParseError, AstErrorType}, ast_error, tokenizer::{TokenType, Separator}};
 
-use super::{literal::parse_literal, identifier::parse_identifier, function_call::parse_function_call};
-
-fn parse_sequence_token(parser: &AstParser, index: usize, tokens_used: &mut usize) -> Result<Expression, AstParseError> {
-    // TODO: Add the other expressions when implemented
-    if let Ok(result) = parse_function_call(parser, index, tokens_used) {
-        return Ok(Expression::CallExpression(result));
-    }
-
-    if let Ok(result) = parse_literal(parser, index, tokens_used) {
-        return Ok(Expression::Literal(result));
-    }
-
-    if let Ok(result) = parse_identifier(parser, index, tokens_used) {
-        return Ok(Expression::Identifier(result));
-    }
-
-    ast_error!(AstErrorType::UnexpectedToken, parser)
-}
+use super::parse_non_sequence_expression;
 
 fn is_end_marker(parser: &AstParser, index: usize, tokens_used: &mut usize) -> bool {
     match parser.token_at(index) {
@@ -63,7 +46,7 @@ pub fn parse_sequence(parser: &AstParser, index: usize, tokens_used: &mut usize)
     let mut expressions = Vec::new();
 
     loop {
-        expressions.push(parse_sequence_token(parser, index + tokens, &mut tokens)?);
+        expressions.push(parse_non_sequence_expression(parser, index + tokens, &mut tokens)?);
 
         if is_end_marker(parser, index + tokens, &mut tokens) { break; }
 
@@ -79,7 +62,7 @@ pub fn parse_sequence(parser: &AstParser, index: usize, tokens_used: &mut usize)
 
 #[cfg(test)]
 mod tests {
-    use crate::{tokenizer, ast::{parser::AstParser, parsers::parts::sequence::parse_sequence, nodes::expression_statement::Expression}, cast_expression};
+    use crate::{tokenizer, ast::{parser::AstParser, parsers::parts::sequence::parse_sequence, nodes::expression_statement::Expression}};
 
     #[test]
     fn sequence_can_be_parsed_as_a_sequence() {
